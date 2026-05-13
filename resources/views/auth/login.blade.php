@@ -25,7 +25,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        position: relative;
+        position: fixed;
+        inset: 0;
         font-family: 'Outfit', sans-serif;
         overflow: hidden;
         padding: 0 clamp(24px, 4vw, 72px);
