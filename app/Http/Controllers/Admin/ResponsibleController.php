@@ -8,6 +8,16 @@ use Illuminate\Http\Request;
 
 class ResponsibleController extends Controller
 {
+    private function normalizePhone(?string $phone): ?string
+    {
+        if (!$phone) {
+            return null;
+        }
+
+        $digits = preg_replace('/\D/', '', $phone);
+        return $digits !== '' ? $digits : null;
+    }
+
     public function index()
     {
         $responsibles = Responsible::withCount('cards')->orderBy('name')->paginate(10);
@@ -35,6 +45,7 @@ class ResponsibleController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
+        $validated['phone'] = $this->normalizePhone($validated['phone'] ?? null);
         Responsible::create($validated);
 
         return redirect()->route('responsibles.index')->with('sucesso', 'Responsável cadastrado com sucesso!');
@@ -60,6 +71,7 @@ class ResponsibleController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
+        $validated['phone'] = $this->normalizePhone($validated['phone'] ?? null);
         $responsible->update($validated);
 
         return redirect()->route('responsibles.index')->with('sucesso', 'Responsável atualizado com sucesso!');

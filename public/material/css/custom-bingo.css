@@ -436,6 +436,21 @@ select.form-control {
     color: var(--bingo-text-dark);
     font-size: 0.85rem;
     margin-bottom: 8px;
+    display: block;
+    position: static !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group .form-label {
+    margin-top: 0;
 }
 
 /* ===== PAGINATION ===== */

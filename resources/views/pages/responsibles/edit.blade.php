@@ -4,7 +4,7 @@
 <div class="content">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-6">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-header card-header-primary">
                         <h4 class="card-title">Editar Responsável</h4>
@@ -23,7 +23,7 @@
 
                             <div class="form-group">
                                 <label class="form-label">Telefone</label>
-                                <input type="text" name="phone" class="form-control @error('phone') is-invalid @enderror" value="{{ old('phone', $responsible->phone) }}" placeholder="(00) 00000-0000">
+                                <input type="text" name="phone" class="form-control phone-mask @error('phone') is-invalid @enderror" value="{{ old('phone', $responsible->phone) }}" placeholder="(00) 00000-0000" inputmode="numeric" maxlength="15">
                                 @error('phone')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -62,3 +62,29 @@
     </div>
 </div>
 @endsection
+
+@push('js')
+<script>
+    (function () {
+        const phoneInputs = document.querySelectorAll('.phone-mask');
+        const formatPhone = function (value) {
+            const digits = (value || '').replace(/\D/g, '').slice(0, 11);
+            if (digits.length <= 10) {
+                return digits
+                    .replace(/^(\d{2})(\d)/, '($1) $2')
+                    .replace(/(\d{4})(\d)/, '$1-$2');
+            }
+            return digits
+                .replace(/^(\d{2})(\d)/, '($1) $2')
+                .replace(/(\d{5})(\d)/, '$1-$2');
+        };
+
+        phoneInputs.forEach(function (input) {
+            input.value = formatPhone(input.value);
+            input.addEventListener('input', function (e) {
+                e.target.value = formatPhone(e.target.value);
+            });
+        });
+    })();
+</script>
+@endpush
