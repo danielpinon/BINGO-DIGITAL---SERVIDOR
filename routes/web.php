@@ -36,6 +36,33 @@ Route::group([
      */
     Route::get('/home', 'HomeController@index')->name('admin.home');
 
+    // Bingos
+    Route::resource('bingos', 'BingoController');
+    Route::post('bingos/{bingo}/start', 'BingoController@start')->name('bingos.start');
+    Route::post('bingos/{bingo}/finish', 'BingoController@finish')->name('bingos.finish');
+
+    // Responsáveis
+    Route::resource('responsibles', 'ResponsibleController');
+
+    // Cartelas
+    Route::get('cards/generate', 'CardController@generateForm')->name('cards.generate.form');
+    Route::post('cards/generate', 'CardController@generate')->name('cards.generate');
+    Route::get('cards', 'CardController@index')->name('cards.index');
+    Route::get('cards/export', 'CardController@export')->name('cards.export');
+    Route::post('cards/{card}/assign', 'CardController@assign')->name('cards.assign');
+
+    // Sorteio
+    Route::get('draw/{bingo}', 'DrawController@index')->name('draw.index');
+
+    // Ganhadores
+    Route::get('winners', 'WinnerController@index')->name('winners.index');
+    Route::post('winners/{winner}/confirm', 'WinnerController@confirm')->name('winners.confirm');
+
+    // Relatórios
+    Route::get('reports', 'ReportController@index')->name('reports.index');
+
+    // Configurações
+    Route::get('settings', 'SettingsController@index')->name('settings.index');
 
     /*
     |--------------------------------------------------------------------------
@@ -106,5 +133,8 @@ Route::post('password/confirm', 'Auth\ConfirmPasswordController@confirm');
 Route::get('email/verify', 'Auth\VerificationController@show')->name('verification.notice');
 Route::get('email/verify/{id}/{hash}', 'Auth\VerificationController@verify')->name('verification.verify');
 Route::post('email/resend', 'Auth\VerificationController@resend')->name('verification.resend');
+
+// Tela Pública (sem auth)
+Route::get('bingo/{bingo}/tela', 'Admin\PublicScreenController@show')->name('public.screen');
 
 
