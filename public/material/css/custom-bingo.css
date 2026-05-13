@@ -358,13 +358,77 @@
     border-radius: 10px;
     border: 2px solid var(--bingo-border);
     padding: 12px 16px;
+    height: 46px;
     font-size: 0.9rem;
+    line-height: 1.25;
+    color: var(--bingo-text-dark);
+    background: #fff;
     transition: all 0.3s ease;
 }
 
 .form-control:focus {
     border-color: var(--bingo-accent);
     box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+}
+
+textarea.form-control {
+    min-height: 110px;
+    height: auto;
+    resize: vertical;
+}
+
+select.form-control {
+    height: 46px !important;
+    padding-right: 36px;
+}
+
+.form-control::placeholder {
+    color: #94a3b8;
+    opacity: 1;
+}
+
+.form-control.is-invalid,
+.was-validated .form-control:invalid {
+    border-color: #ef4444;
+}
+
+.invalid-feedback,
+.text-danger {
+    font-size: 0.8rem;
+}
+
+/* Input groups (corrige desalinhamento input + botão) */
+.input-group {
+    flex-wrap: nowrap;
+}
+
+.input-group > .form-control {
+    margin: 0 !important;
+}
+
+.input-group .input-group-append .btn,
+.input-group .input-group-prepend .btn {
+    margin: 0 !important;
+    height: 46px;
+    border-radius: 0 10px 10px 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    display: inline-flex;
+    align-items: center;
+}
+
+.input-group .input-group-prepend .btn {
+    border-radius: 10px 0 0 10px;
+}
+
+.input-group > .form-control:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-group > .form-control:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 }
 
 .form-label {

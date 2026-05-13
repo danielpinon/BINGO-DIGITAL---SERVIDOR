@@ -54,9 +54,9 @@
                             <div class="form-group">
                                 <label class="form-label">Controle Manual</label>
                                 <div class="input-group">
-                                    <input type="number" wire:model="manualNumber" class="form-control" placeholder="Nº" min="1" max="99">
+                                    <input type="number" wire:model="manualNumber" class="form-control" placeholder="Nº" min="{{ $bingo->number_range_start }}" max="{{ $bingo->number_range_end }}">
                                     <div class="input-group-append">
-                                        <button wire:click="addManualNumber" class="btn btn-primary">Adicionar</button>
+                                        <button type="button" wire:click="addManualNumber" class="btn btn-primary">Adicionar</button>
                                     </div>
                                 </div>
                                 @error('manualNumber')
