@@ -355,25 +355,25 @@
 
 /* ===== FORMS ===== */
 .form-control {
-    border-radius: 10px;
-    border: 2px solid var(--bingo-border);
-    padding: 12px 16px;
-    height: 46px;
+    border-radius: 10px !important;
+    border: 2px solid var(--bingo-border) !important;
+    padding: 12px 16px !important;
+    height: 46px !important;
     font-size: 0.9rem;
     line-height: 1.25;
     color: var(--bingo-text-dark);
-    background: #fff;
+    background: #fff !important;
     transition: all 0.3s ease;
 }
 
 .form-control:focus {
-    border-color: var(--bingo-accent);
-    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+    border-color: var(--bingo-accent) !important;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1) !important;
 }
 
 textarea.form-control {
     min-height: 110px;
-    height: auto;
+    height: auto !important;
     resize: vertical;
 }
 
@@ -399,7 +399,7 @@ select.form-control {
 
 /* Input groups (corrige desalinhamento input + botão) */
 .input-group {
-    flex-wrap: nowrap;
+    flex-wrap: nowrap !important;
 }
 
 .input-group > .form-control {
@@ -409,7 +409,7 @@ select.form-control {
 .input-group .input-group-append .btn,
 .input-group .input-group-prepend .btn {
     margin: 0 !important;
-    height: 46px;
+    height: 46px !important;
     border-radius: 0 10px 10px 0;
     padding-top: 0;
     padding-bottom: 0;
@@ -433,10 +433,10 @@ select.form-control {
 
 .form-label {
     font-weight: 600;
-    color: var(--bingo-text-dark);
+    color: var(--bingo-text-dark) !important;
     font-size: 0.85rem;
     margin-bottom: 8px;
-    display: block;
+    display: block !important;
     position: static !important;
     transform: none !important;
     top: auto !important;
