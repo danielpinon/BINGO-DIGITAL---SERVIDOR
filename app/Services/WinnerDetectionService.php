@@ -33,14 +33,15 @@ class WinnerDetectionService
                 }
             }
 
-            $isWinner = $this->checkPattern($currentPattern->pattern_type, $marked);
+            $missingForPattern = $this->getMissingForPattern($currentPattern->pattern_type, $marked, $grid);
+            $isWinner = count($missingForPattern) === 0;
 
-            if ($isWinner) {
+            if ($isWinner || count($missingForPattern) <= 2) {
                 $possibleWinners[] = [
                     'card' => $card,
-                    'missing' => $missing,
-                    'is_winner' => true,
-                    'is_close' => false,
+                    'missing' => $isWinner ? [] : $missingForPattern,
+                    'is_winner' => $isWinner,
+                    'is_close' => !$isWinner,
                     'pattern_type' => $currentPattern->pattern_type,
                 ];
             }
@@ -150,5 +151,113 @@ class WinnerDetectionService
     private function checkCorners(array $marked): bool
     {
         return $marked[0][0] && $marked[0][4] && $marked[4][0] && $marked[4][4];
+    }
+
+    private function getMissingForPattern(string $patternType, array $marked, array $grid): array
+    {
+        return match($patternType) {
+            'line' => $this->missingForLine($marked, $grid),
+            'quina' => $this->missingForQuina($marked, $grid),
+            'full_card' => $this->missingForFullCard($marked, $grid),
+            'cross' => $this->missingForCross($marked, $grid),
+            'corners' => $this->missingForCorners($marked, $grid),
+            default => [],
+        };
+    }
+
+    private function missingForLine(array $marked, array $grid): array
+    {
+        $bestMissing = null;
+
+        for ($row = 0; $row < 5; $row++) {
+            $missing = [];
+            for ($col = 0; $col < 5; $col++) {
+                if (!$marked[$row][$col]) {
+                    $missing[] = $grid[$row][$col];
+                }
+            }
+
+            if ($bestMissing === null || count($missing) < count($bestMissing)) {
+                $bestMissing = $missing;
+            }
+        }
+
+        return $bestMissing ?? [];
+    }
+
+    private function missingForQuina(array $marked, array $grid): array
+    {
+        $missing = [];
+        $markedCount = 0;
+
+        for ($row = 0; $row < 5; $row++) {
+            for ($col = 0; $col < 5; $col++) {
+                if ($marked[$row][$col]) {
+                    $markedCount++;
+                } else {
+                    $missing[] = $grid[$row][$col];
+                }
+            }
+        }
+
+        if ($markedCount >= 5) {
+            return [];
+        }
+
+        return array_slice($missing, 0, 5 - $markedCount);
+    }
+
+    private function missingForFullCard(array $marked, array $grid): array
+    {
+        $missing = [];
+        for ($row = 0; $row < 5; $row++) {
+            for ($col = 0; $col < 5; $col++) {
+                if (!$marked[$row][$col]) {
+                    $missing[] = $grid[$row][$col];
+                }
+            }
+        }
+        return $missing;
+    }
+
+    private function missingForCross(array $marked, array $grid): array
+    {
+        $required = [];
+
+        for ($col = 0; $col < 5; $col++) {
+            $required[] = [2, $col];
+        }
+
+        for ($row = 0; $row < 5; $row++) {
+            $required[] = [$row, 2];
+        }
+
+        $unique = [];
+        foreach ($required as [$row, $col]) {
+            $unique[$row . '-' . $col] = [$row, $col];
+        }
+
+        $missing = [];
+        foreach ($unique as [$row, $col]) {
+            if (!$marked[$row][$col]) {
+                $missing[] = $grid[$row][$col];
+            }
+        }
+
+        return $missing;
+    }
+
+    private function missingForCorners(array $marked, array $grid): array
+    {
+        $corners = [[0, 0], [0, 4], [4, 0], [4, 4]];
+        $missing = [];
+
+        foreach ($corners as [$row, $col]) {
+            if (!$marked[$row][$col]) {
+                $missing[] = $grid[$row][$col];
+            }
+        }
+
+        return $missing;
     }
 }

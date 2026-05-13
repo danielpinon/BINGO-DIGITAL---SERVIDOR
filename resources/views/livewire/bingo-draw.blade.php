@@ -109,7 +109,7 @@
                         <strong>{{ $stats['totalCards'] ?? 0 }}</strong>
                     </div>
                     <div class="d-flex justify-content-between">
-                        <span>Possíveis Ganhadores</span>
+                        <span>Possíveis Ganhadores / Perto de Bater</span>
                         <strong>{{ count($possibleWinners) }}</strong>
                     </div>
                 </div>
@@ -129,7 +129,7 @@
                             @if($winner['is_winner'])
                                 <span class="badge badge-success">GANHADOR!</span>
                             @else
-                                <span class="badge badge-warning">Faltam {{ count($winner['missing']) }}</span>
+                                <span class="badge badge-warning">PERTO DE BATER (Faltam {{ count($winner['missing']) }})</span>
                             @endif
                         </div>
                         
