@@ -5,18 +5,30 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-    html, body { overflow: hidden; height: 100%; }
+    html, body {
+        min-height: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+    }
     .off-canvas-sidebar .navbar .navbar-collapse .navbar-nav .nav-item .nav-link { color: rgba(255,255,255,0.7); }
+
+    .guest-navbar {
+        display: none !important;
+    }
 
     .bingo-login-page {
         background: #070518;
         min-height: 100vh;
+        height: 100vh;
+        width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
         font-family: 'Outfit', sans-serif;
         overflow: hidden;
+        padding: 0 clamp(24px, 4vw, 72px);
     }
 
     /* Animated gradient orbs */
@@ -98,19 +110,20 @@
         position: relative;
         z-index: 2;
         width: 100%;
-        max-width: 1160px;
+        max-width: 1360px;
         margin: 0 auto;
-        padding: 24px;
+        min-height: 100%;
+        height: 100%;
         display: grid;
-        grid-template-columns: 1fr 440px;
-        gap: 64px;
+        grid-template-columns: minmax(0, 1fr) minmax(420px, 500px);
+        gap: clamp(52px, 6vw, 110px);
         align-items: center;
     }
 
     /* Left branding panel */
     .bingo-brand-panel {
         color: #fff;
-        padding: 40px 24px;
+        padding: clamp(24px, 4vw, 56px) 0;
         animation: fadeSlideInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     .bingo-brand-badge {
@@ -126,7 +139,7 @@
         letter-spacing: 0.08em;
         text-transform: uppercase;
         color: #c4b5fd;
-        margin-bottom: 32px;
+        margin-bottom: clamp(24px, 3vw, 40px);
     }
     .bingo-brand-badge .dot {
         width: 8px; height: 8px;
@@ -142,10 +155,10 @@
     .bingo-brand-title {
         font-family: 'Outfit', sans-serif;
         font-weight: 900;
-        font-size: clamp(2.6rem, 5.5vw, 4.2rem);
+        font-size: clamp(3.2rem, 5vw, 5.5rem);
         line-height: 1.05;
         letter-spacing: -0.03em;
-        margin-bottom: 20px;
+        margin-bottom: clamp(18px, 2vw, 28px);
         color: #fafafa;
     }
     .bingo-brand-title .accent {
@@ -160,12 +173,13 @@
         font-weight: 400;
         color: rgba(255,255,255,0.55);
         line-height: 1.6;
-        max-width: 440px;
-        margin-bottom: 48px;
+        max-width: 560px;
+        margin-bottom: clamp(34px, 4vw, 58px);
     }
     .bingo-brand-stats {
         display: flex;
-        gap: 40px;
+        gap: clamp(28px, 4vw, 56px);
+        flex-wrap: wrap;
     }
     .bingo-stat {
         display: flex;
@@ -194,7 +208,8 @@
         -webkit-backdrop-filter: blur(24px);
         border: 1px solid rgba(255, 255, 255, 0.07);
         border-radius: 24px;
-        padding: 44px 40px;
+        width: 100%;
+        padding: clamp(38px, 4vw, 56px) clamp(34px, 3.5vw, 48px);
         box-shadow:
             0 0 0 1px rgba(139, 92, 246, 0.05),
             0 40px 80px -20px rgba(0, 0, 0, 0.6),
@@ -203,11 +218,11 @@
         opacity: 0;
     }
     .bingo-login-card-header {
-        margin-bottom: 32px;
+        margin-bottom: clamp(28px, 3vw, 38px);
     }
     .bingo-login-card-title {
         font-weight: 700;
-        font-size: 1.5rem;
+        font-size: clamp(1.55rem, 1.6vw, 1.9rem);
         color: #fff;
         margin-bottom: 6px;
         letter-spacing: -0.01em;
@@ -222,14 +237,14 @@
     /* Custom inputs */
     .bingo-input-group {
         position: relative;
-        margin-bottom: 22px;
+        margin-bottom: 24px;
     }
     .bingo-input-group input {
         width: 100%;
         background: rgba(0, 0, 0, 0.25);
         border: 1.5px solid rgba(255, 255, 255, 0.08);
         border-radius: 14px;
-        padding: 16px 18px 16px 48px;
+        padding: 18px 18px 18px 52px;
         color: #fff;
         font-family: 'Outfit', sans-serif;
         font-size: 0.95rem;
@@ -284,7 +299,7 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        margin-bottom: 28px;
+        margin-bottom: 30px;
         cursor: pointer;
         user-select: none;
     }
@@ -321,7 +336,7 @@
     /* Submit button */
     .bingo-submit-btn {
         width: 100%;
-        padding: 16px 24px;
+        padding: 18px 24px;
         border: none;
         border-radius: 14px;
         background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 40%, #a855f7 100%);
@@ -360,8 +375,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-top: 26px;
-        padding-top: 20px;
+        margin-top: 28px;
+        padding-top: 22px;
         border-top: 1px solid rgba(255,255,255,0.06);
     }
     .bingo-login-footer a {
@@ -387,15 +402,16 @@
     }
 
     /* Responsive */
-    @media (max-width: 960px) {
+    @media (max-width: 1100px) {
         .bingo-login-container {
             grid-template-columns: 1fr;
             gap: 32px;
-            max-width: 460px;
+            max-width: 560px;
+            min-height: auto;
         }
         .bingo-brand-panel {
             text-align: center;
-            padding: 24px 0 0;
+            padding: 16px 0 0;
         }
         .bingo-brand-stats {
             justify-content: center;
@@ -404,16 +420,79 @@
         .bingo-brand-subtitle { margin: 0 auto 32px; }
     }
     @media (max-width: 480px) {
-        .bingo-login-container { padding: 16px; gap: 20px; }
+        .bingo-login-page { padding: 0 16px; }
+        .bingo-login-container { gap: 20px; }
         .bingo-login-card { padding: 32px 24px; border-radius: 20px; }
         .bingo-brand-title { font-size: 2rem; }
         .bingo-brand-stats { gap: 24px; }
+    }
+
+    @media (max-height: 780px) and (min-width: 961px) {
+        .bingo-login-page {
+            min-height: 100vh;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        .bingo-login-container {
+            min-height: auto;
+        }
+
+        .bingo-brand-badge {
+            margin-bottom: 20px;
+        }
+
+        .bingo-brand-title {
+            font-size: clamp(3rem, 4.7vw, 4.2rem);
+            margin-bottom: 18px;
+        }
+
+        .bingo-brand-subtitle {
+            margin-bottom: 28px;
+            line-height: 1.45;
+        }
+
+        .bingo-login-card {
+            padding: 30px 36px;
+            border-radius: 22px;
+        }
+
+        .bingo-login-card-header {
+            margin-bottom: 22px;
+        }
+
+        .bingo-input-group {
+            margin-bottom: 16px;
+        }
+
+        .bingo-input-group input {
+            padding-top: 14px;
+            padding-bottom: 14px;
+        }
+
+        .bingo-remember {
+            margin-bottom: 20px;
+        }
+
+        .bingo-submit-btn {
+            padding-top: 15px;
+            padding-bottom: 15px;
+        }
+
+        .bingo-login-footer {
+            margin-top: 18px;
+            padding-top: 16px;
+        }
     }
 
     /* Hide old material dashboard background on login page specifically */
     .page-header.login-page {
         background: transparent !important;
         position: static !important;
+        min-height: 100vh !important;
+        height: 100vh !important;
+        padding: 0 !important;
+        overflow: hidden !important;
     }
     .page-header.login-page::before,
     .page-header.login-page::after {
@@ -426,6 +505,14 @@
     }
     .wrapper-full-page {
         background: #070518 !important;
+        min-height: 100vh;
+        height: 100vh;
+        padding-top: 0;
+        overflow: hidden;
+    }
+
+    .page-header.login-page > .footer {
+        display: none !important;
     }
 </style>
 @endpush
