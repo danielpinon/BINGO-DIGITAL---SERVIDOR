@@ -12,7 +12,7 @@ class Bingo extends Model
     protected $fillable = [
         'name', 'description', 'event_date', 'event_time',
         'number_range_start', 'number_range_end',
-        'card_quantity', 'numbers_per_card',
+        'card_quantity', 'numbers_per_card', 'round_quantity',
         'status', 'current_prize_pattern_id', 'created_by'
     ];
 
@@ -34,6 +34,23 @@ class Bingo extends Model
     public function currentPrizePattern()
     {
         return $this->belongsTo(BingoPrizePattern::class, 'current_prize_pattern_id');
+    }
+
+    public function rounds()
+    {
+        return $this->hasMany(BingoRound::class)->orderBy('round_number');
+    }
+
+    public function activeRound()
+    {
+        return $this->hasOne(BingoRound::class)->where('status', 'ongoing');
+    }
+
+    public function currentRound()
+    {
+        return $this->activeRound()->first()
+            ?: $this->rounds()->where('status', 'pending')->orderBy('round_number')->first()
+            ?: $this->rounds()->orderByDesc('round_number')->first();
     }
 
     public function cards()

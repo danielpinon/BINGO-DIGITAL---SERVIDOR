@@ -7,6 +7,27 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #fff; }
         .page { width: 100%; padding: 10mm; page-break-after: always; }
+        .pdf-header {
+            text-align: center;
+            margin-bottom: 8mm;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 5mm;
+        }
+        .pdf-logo {
+            width: 42mm;
+            height: auto;
+            margin-bottom: 2mm;
+        }
+        .pdf-title {
+            color: #1e3a8a;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 1mm;
+        }
+        .pdf-subtitle {
+            color: #64748b;
+            font-size: 10px;
+        }
         .card-container { 
             width: 48%; 
             float: left; 
@@ -47,6 +68,14 @@
 </head>
 <body>
     <div class="page">
+        <div class="pdf-header">
+            <img src="{{ public_path('material/img/logo.png') }}" class="pdf-logo" alt="Logo">
+            <div class="pdf-title">{{ $bingo->name }}</div>
+            <div class="pdf-subtitle">
+                {{ $bingo->round_quantity }} {{ $bingo->round_quantity == 1 ? 'rodada' : 'rodadas' }} usando as mesmas cartelas
+            </div>
+        </div>
+
         @foreach($bingo->cards as $index => $card)
             <div class="card-container">
                 <div class="card-header">

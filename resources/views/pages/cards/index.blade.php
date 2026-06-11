@@ -10,9 +10,16 @@
                         <h3>Cartelas</h3>
                         <p>Visualize e gerencie as cartelas geradas</p>
                     </div>
-                    <a href="{{ route('cards.generate.form') }}" class="btn btn-primary">
-                        <i class="material-icons">add</i> Gerar Cartelas
-                    </a>
+                    <div class="d-flex" style="gap: 8px;">
+                        @if(request('bingo_id'))
+                            <a href="{{ route('cards.export', ['bingo_id' => request('bingo_id'), 'print' => 1]) }}" target="_blank" class="btn btn-info">
+                                <i class="material-icons">picture_as_pdf</i> Imprimir PDF
+                            </a>
+                        @endif
+                        <a href="{{ route('cards.generate.form') }}" class="btn btn-primary">
+                            <i class="material-icons">add</i> Gerar Cartelas
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Bingo;
 use App\Models\BingoPrizePattern;
+use App\Models\BingoRound;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -47,6 +48,7 @@ class BingoController extends Controller
             'number_range_end' => 'required|integer|gt:number_range_start',
             'card_quantity' => 'required|integer|min:1',
             'numbers_per_card' => 'required|integer|min:1',
+            'round_quantity' => 'required|integer|min:1|max:5',
             'prize_patterns' => 'required|array|min:1',
             'prize_patterns.*' => 'required|string|in:line,quina,full_card,cross,corners',
         ]);
@@ -60,6 +62,7 @@ class BingoController extends Controller
             'number_range_end' => $validated['number_range_end'],
             'card_quantity' => $validated['card_quantity'],
             'numbers_per_card' => $validated['numbers_per_card'],
+            'round_quantity' => $validated['round_quantity'],
             'status' => 'preparation',
             'created_by' => Auth::id(),
         ]);
@@ -81,12 +84,14 @@ class BingoController extends Controller
             ]);
         }
 
+        $this->syncRounds($bingo, (int) $validated['round_quantity']);
+
         return redirect()->route('bingos.index')->with('sucesso', 'Bingo criado com sucesso!');
     }
 
     public function show(Bingo $bingo)
     {
-        $bingo->load(['prizePatterns', 'cards' => function($q) { $q->limit(8); }, 'winners']);
+        $bingo->load(['prizePatterns', 'rounds.winners', 'cards' => function($q) { $q->limit(8); }, 'winners']);
         return view('pages.bingos.show', compact('bingo'));
     }
 
@@ -114,9 +119,14 @@ class BingoController extends Controller
             'number_range_end' => 'required|integer|gt:number_range_start',
             'card_quantity' => 'required|integer|min:1',
             'numbers_per_card' => 'required|integer|min:1',
+            'round_quantity' => 'required|integer|min:1|max:5',
         ]);
 
         $bingo->update($validated);
+
+        if ($bingo->status === 'preparation') {
+            $this->syncRounds($bingo, (int) $validated['round_quantity']);
+        }
 
         return redirect()->route('bingos.index')->with('sucesso', 'Bingo atualizado com sucesso!');
     }
@@ -133,11 +143,26 @@ class BingoController extends Controller
             return back()->with('falha', 'O bingo já foi iniciado ou finalizado.');
         }
 
-        $firstPattern = $bingo->prizePatterns()->where('is_completed', false)->orderBy('pattern_order')->first();
+        $firstPattern = $bingo->prizePatterns()->orderBy('pattern_order')->first();
+
+        if (!$firstPattern) {
+            return back()->with('falha', 'Cadastre ao menos um padrão de premiação antes de iniciar.');
+        }
+
+        $this->syncRounds($bingo, (int) $bingo->round_quantity);
+
+        $firstRound = $bingo->rounds()->where('round_number', 1)->first();
 
         $bingo->update([
             'status' => 'ongoing',
             'current_prize_pattern_id' => $firstPattern?->id,
+        ]);
+
+        $firstRound->update([
+            'status' => 'ongoing',
+            'current_prize_pattern_id' => $firstPattern->id,
+            'started_at' => now(),
+            'finished_at' => null,
         ]);
 
         return redirect()->route('draw.index', $bingo)->with('sucesso', 'Bingo iniciado!');
@@ -149,8 +174,32 @@ class BingoController extends Controller
             return back()->with('falha', 'O bingo não está em andamento.');
         }
 
-        $bingo->update(['status' => 'finished']);
+        $bingo->activeRound?->update([
+            'status' => 'finished',
+            'finished_at' => now(),
+        ]);
+
+        $bingo->update([
+            'status' => 'finished',
+            'current_prize_pattern_id' => null,
+        ]);
 
         return redirect()->route('bingos.index')->with('sucesso', 'Bingo finalizado!');
+    }
+
+    private function syncRounds(Bingo $bingo, int $quantity): void
+    {
+        for ($roundNumber = 1; $roundNumber <= $quantity; $roundNumber++) {
+            BingoRound::firstOrCreate([
+                'bingo_id' => $bingo->id,
+                'round_number' => $roundNumber,
+            ], [
+                'status' => 'pending',
+            ]);
+        }
+
+        if ($bingo->status === 'preparation') {
+            $bingo->rounds()->where('round_number', '>', $quantity)->delete();
+        }
     }
 }

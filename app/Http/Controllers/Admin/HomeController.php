@@ -42,9 +42,9 @@ class HomeController extends Controller
             ->get();
 
         $lastDrawnNumbers = [];
-        $activeBingo = Bingo::where('status', 'ongoing')->first();
-        if ($activeBingo) {
-            $lastDrawnNumbers = $activeBingo->drawnNumbers()
+        $activeBingo = Bingo::with('rounds')->where('status', 'ongoing')->first();
+        if ($activeBingo && $activeBingo->activeRound) {
+            $lastDrawnNumbers = $activeBingo->activeRound->drawnNumbers()
                 ->orderBy('drawn_at', 'desc')
                 ->take(20)
                 ->pluck('number')

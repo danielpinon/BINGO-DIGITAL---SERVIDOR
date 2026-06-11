@@ -13,7 +13,7 @@ class DrawController extends Controller
             return redirect()->route('bingos.index')->with('falha', 'O bingo ainda não foi iniciado.');
         }
 
-        $bingo->load(['prizePatterns', 'drawnNumbers', 'cards.responsible', 'winners']);
+        $bingo->load(['prizePatterns', 'rounds.currentPrizePattern', 'rounds.drawnNumbers', 'cards.responsible', 'winners']);
         
         return view('pages.draw.index', compact('bingo'));
     }

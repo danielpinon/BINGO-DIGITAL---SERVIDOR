@@ -19,7 +19,7 @@
                         <h4 class="card-title">Configuração da Geração</h4>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('cards.generate') }}" method="POST">
+                        <form action="{{ route('cards.generate') }}" method="POST" id="generate-cards-form">
                             @csrf
                             <div class="form-group">
                                 <label class="form-label">Selecionar Bingo *</label>
@@ -45,8 +45,8 @@
                             </div>
 
                             <div class="mt-4">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="material-icons">grid_on</i> Gerar Cartelas
+                                <button type="submit" class="btn btn-primary" id="generate-cards-button">
+                                    <i class="material-icons">grid_on</i> <span>Gerar Cartelas</span>
                                 </button>
                                 <a href="{{ route('cards.index') }}" class="btn btn-outline-primary">Ver Cartelas</a>
                             </div>
@@ -75,3 +75,15 @@
     </div>
 </div>
 @endsection
+
+@push('js')
+<script>
+    document.getElementById('generate-cards-form')?.addEventListener('submit', function () {
+        const button = document.getElementById('generate-cards-button');
+        if (!button) return;
+
+        button.disabled = true;
+        button.querySelector('span').textContent = 'Gerando...';
+    });
+</script>
+@endpush

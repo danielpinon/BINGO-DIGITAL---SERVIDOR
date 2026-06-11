@@ -3,13 +3,15 @@
 namespace App\Services;
 
 use App\Models\Bingo;
+use App\Models\BingoRound;
 use App\Models\Card;
 
 class WinnerDetectionService
 {
-    public function getPossibleWinners(Bingo $bingo, array $drawnNumbers): array
+    public function getPossibleWinners(Bingo $bingo, array $drawnNumbers, ?BingoRound $round = null): array
     {
-        $currentPattern = $bingo->currentPrizePattern;
+        $round = $round ?: $bingo->currentRound();
+        $currentPattern = $round?->currentPrizePattern ?: $bingo->currentPrizePattern;
         if (!$currentPattern) {
             return [];
         }
@@ -54,9 +56,10 @@ class WinnerDetectionService
         return array_slice($possibleWinners, 0, 10);
     }
 
-    public function verifyWinner(Bingo $bingo, int $cardId, array $drawnNumbers): bool
+    public function verifyWinner(Bingo $bingo, int $cardId, array $drawnNumbers, ?BingoRound $round = null): bool
     {
-        $currentPattern = $bingo->currentPrizePattern;
+        $round = $round ?: $bingo->currentRound();
+        $currentPattern = $round?->currentPrizePattern ?: $bingo->currentPrizePattern;
         if (!$currentPattern) {
             return false;
         }

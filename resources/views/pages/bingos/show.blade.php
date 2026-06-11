@@ -69,7 +69,8 @@
                         <p class="mb-2"><strong>Nome:</strong> {{ $bingo->name }}</p>
                         <p class="mb-2"><strong>Descrição:</strong> {{ $bingo->description ?: 'Sem descrição' }}</p>
                         <p class="mb-2"><strong>Intervalo de números:</strong> {{ $bingo->number_range_start }} até {{ $bingo->number_range_end }}</p>
-                        <p class="mb-0"><strong>Números por cartela:</strong> {{ $bingo->numbers_per_card }}</p>
+                        <p class="mb-2"><strong>Números por cartela:</strong> {{ $bingo->numbers_per_card }}</p>
+                        <p class="mb-0"><strong>Sorteios/Rodadas:</strong> {{ $bingo->round_quantity }}</p>
                     </div>
                 </div>
 
@@ -85,9 +86,28 @@
                                 @foreach($bingo->prizePatterns as $pattern)
                                     <li>
                                         {{ $pattern->pattern_order }}. {{ $pattern->name }}
-                                        @if($pattern->is_completed)
-                                            <span class="badge badge-success ml-2">Concluído</span>
-                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <h4 class="card-title">Rodadas</h4>
+                    </div>
+                    <div class="card-body">
+                        @if($bingo->rounds->isEmpty())
+                            <p class="text-muted mb-0">Nenhuma rodada criada.</p>
+                        @else
+                            <ul class="mb-0 pl-3">
+                                @foreach($bingo->rounds as $round)
+                                    <li>
+                                        Rodada {{ $round->round_number }}
+                                        <span class="badge badge-{{ $round->status === 'ongoing' ? 'success' : ($round->status === 'finished' ? 'info' : 'secondary') }} ml-2">
+                                            {{ $round->status === 'ongoing' ? 'Em andamento' : ($round->status === 'finished' ? 'Finalizada' : 'Pendente') }}
+                                        </span>
                                     </li>
                                 @endforeach
                             </ul>

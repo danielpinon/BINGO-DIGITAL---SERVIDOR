@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class DrawnNumber extends Model
 {
-    protected $fillable = ['bingo_id', 'number', 'drawn_at'];
+    protected $fillable = ['bingo_id', 'bingo_round_id', 'number', 'drawn_at'];
 
     protected $casts = [
         'drawn_at' => 'datetime',
@@ -15,5 +15,10 @@ class DrawnNumber extends Model
     public function bingo()
     {
         return $this->belongsTo(Bingo::class);
+    }
+
+    public function round()
+    {
+        return $this->belongsTo(BingoRound::class, 'bingo_round_id');
     }
 }

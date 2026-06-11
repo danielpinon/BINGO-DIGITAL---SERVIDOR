@@ -91,6 +91,15 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
+                                        <label class="form-label">Quantidade de Sorteios/Rodadas *</label>
+                                        <input type="number" name="round_quantity" class="form-control @error('round_quantity') is-invalid @enderror" value="{{ old('round_quantity', $bingo->round_quantity) }}" min="1" max="5" required {{ $bingo->status !== 'preparation' ? 'readonly' : '' }}>
+                                        @error('round_quantity')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
                                         <label class="form-label">Intervalo de Números (Início) *</label>
                                         <input type="number" name="number_range_start" class="form-control @error('number_range_start') is-invalid @enderror" value="{{ old('number_range_start', $bingo->number_range_start) }}" min="1" required>
                                         @error('number_range_start')
@@ -98,6 +107,9 @@
                                         @enderror
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">Intervalo de Números (Fim) *</label>

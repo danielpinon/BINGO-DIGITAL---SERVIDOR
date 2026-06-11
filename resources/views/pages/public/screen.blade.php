@@ -30,6 +30,15 @@
             font-weight: 700;
             color: #fbbf24;
         }
+        .public-logo {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.92);
+            padding: 4px;
+            margin-right: 14px;
+        }
         .public-header .info {
             display: flex;
             gap: 30px;
@@ -86,24 +95,41 @@
             color: #0f0518;
             box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
         }
-        .winners-section {
+        .close-section {
             margin-top: 30px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
         }
-        .winner-card {
+        .close-card {
             background: rgba(255,255,255,0.05);
             border-radius: 16px;
-            padding: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
+            padding: 24px;
+            border: 2px solid rgba(251,191,36,0.45);
+            text-align: center;
         }
-        .winner-card h3 {
+        .close-card h3 {
             color: #fbbf24;
-            font-size: 1rem;
+            font-size: 1.25rem;
             text-transform: uppercase;
             letter-spacing: 2px;
             margin-bottom: 15px;
+        }
+        .missing-numbers {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .missing-number {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            font-weight: 900;
+            background: #fbbf24;
+            color: #0f0518;
+            box-shadow: 0 0 18px rgba(251,191,36,0.45);
         }
         .footer-message {
             position: fixed;
@@ -119,19 +145,20 @@
         @media (max-width: 768px) {
             .number-grid { grid-template-columns: repeat(10, 1fr); }
             .last-number-value { font-size: 5rem; }
-            .winners-section { grid-template-columns: 1fr; }
         }
     </style>
     @livewireStyles
 </head>
 <body>
     <div class="public-header">
-        <div>
-            <h1><i class="material-icons" style="font-size: 32px; vertical-align: middle; margin-right: 10px;">grid_on</i>{{ $bingo->name }}</h1>
+        <div style="display: flex; align-items: center;">
+            <img src="{{ asset('material/img/logo.png') }}" class="public-logo" alt="Logo">
+            <h1>{{ $bingo->name }}</h1>
         </div>
         <div class="info">
             <div><i class="material-icons" style="font-size: 18px; vertical-align: middle;">event</i> {{ $bingo->event_date->format('d/m/Y') }}</div>
             <div><i class="material-icons" style="font-size: 18px; vertical-align: middle;">access_time</i> {{ \Carbon\Carbon::parse($bingo->event_time)->format('H:i') }}</div>
+            <div>RODADA {{ $round?->round_number ?? 1 }} DE {{ $bingo->round_quantity }}</div>
             <div><span style="color: #10b981;">●</span> EM ANDAMENTO</div>
         </div>
     </div>
@@ -139,10 +166,6 @@
     <div class="public-content">
         <div class="last-number-section">
             <div class="last-number-label">Último Número Sorteado</div>
-            @php
-                $lastDrawn = $bingo->drawnNumbers->sortByDesc('drawn_at')->first();
-                $drawnNumbersList = $bingo->drawnNumbers->pluck('number')->toArray();
-            @endphp
             @if($lastDrawn)
                 <div class="last-number-value">{{ str_pad($lastDrawn->number, 2, '0', STR_PAD_LEFT) }}</div>
                 <div style="margin-top: 15px; color: rgba(255,255,255,0.5);">
@@ -162,20 +185,17 @@
             @endfor
         </div>
 
-        @if($bingo->winners->count() > 0)
-        <div class="winners-section">
-            <div class="winner-card">
-                <h3><i class="material-icons" style="font-size: 20px; vertical-align: middle;">emoji_events</i> Último Ganhador</h3>
-                @php $lastWinner = $bingo->winners->sortByDesc('confirmed_at')->first(); @endphp
-                @if($lastWinner)
-                    <div style="font-size: 2rem; font-weight: 700;">Cartela {{ $lastWinner->card->card_number }}</div>
-                    <div style="color: rgba(255,255,255,0.6); margin-top: 5px;">
-                        {{ $lastWinner->prizePattern->name }}
+        @if(count($possibleWinners) > 0)
+        <div class="close-section">
+            <div class="close-card">
+                <h3><i class="material-icons" style="font-size: 24px; vertical-align: middle;">campaign</i> Tem cartela perto de bater</h3>
+                @foreach($possibleWinners as $missingNumbers)
+                    <div class="missing-numbers {{ !$loop->last ? 'mb-3' : '' }}">
+                        @foreach($missingNumbers as $number)
+                            <div class="missing-number">{{ str_pad($number, 2, '0', STR_PAD_LEFT) }}</div>
+                        @endforeach
                     </div>
-                    @if($lastWinner->responsible)
-                        <div style="color: rgba(255,255,255,0.6);">Resp: {{ $lastWinner->responsible->name }}</div>
-                    @endif
-                @endif
+                @endforeach
             </div>
         </div>
         @endif

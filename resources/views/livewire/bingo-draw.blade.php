@@ -3,13 +3,18 @@
         <!-- Left Panel - Draw Controls -->
         <div class="col-lg-8">
             <div class="card">
-                <div class="card-header card-header-primary d-flex justify-content-between align-items-center">
+                    <div class="card-header card-header-primary d-flex justify-content-between align-items-center">
                     <div>
                         <h4 class="card-title">Sistema de Sorteio</h4>
-                        <p class="card-category">{{ $bingo->name }}</p>
+                        <p class="card-category">
+                            {{ $bingo->name }} · Rodada {{ $roundNumber }} de {{ $roundQuantity }}
+                            @if($currentPrizeName)
+                                · Prêmio: {{ $currentPrizeName }}
+                            @endif
+                        </p>
                     </div>
                     <div class="d-flex align-items-center" style="gap: 10px;">
-                        <span class="badge badge-success">Em Andamento</span>
+                            <span class="badge badge-success">Rodada {{ $roundNumber }} em andamento</span>
                         <form action="{{ route('bingos.finish', $bingo) }}" method="POST" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Deseja finalizar o bingo?')">
@@ -30,9 +35,9 @@
                                 {{ str_pad($lastNumber, 2, '0', STR_PAD_LEFT) }}
                             </div>
                             <div class="mt-3">
-                                <button wire:click="undoLast" class="btn btn-outline-primary btn-sm">
-                                    <i class="material-icons" style="font-size: 16px;">undo</i> Desfazer
-                                </button>
+                            <button wire:click="undoLast" wire:loading.attr="disabled" class="btn btn-outline-primary btn-sm">
+                                <i class="material-icons" style="font-size: 16px;">undo</i> Desfazer
+                            </button>
                             </div>
                             @else
                             <div class="number-ball mx-auto" style="width: 120px; height: 120px; font-size: 1.5rem; background: #e2e8f0; color: #94a3b8;">
@@ -43,7 +48,7 @@
 
                         <!-- Draw Button -->
                         <div class="col-md-4 text-center">
-                            <button wire:click="drawNumber" class="btn btn-primary btn-lg" style="padding: 20px 40px; font-size: 1.2rem;">
+                            <button wire:click="drawNumber" wire:loading.attr="disabled" class="btn btn-primary btn-lg" style="padding: 20px 40px; font-size: 1.2rem;">
                                 <i class="material-icons" style="font-size: 28px;">casino</i>
                                 <br>Sortear Número
                             </button>
@@ -56,7 +61,7 @@
                                 <div class="input-group">
                                     <input type="number" wire:model="manualNumber" class="form-control" placeholder="Nº" min="{{ $bingo->number_range_start }}" max="{{ $bingo->number_range_end }}">
                                     <div class="input-group-append">
-                                        <button type="button" wire:click="addManualNumber" class="btn btn-primary">Adicionar</button>
+                                        <button type="button" wire:click="addManualNumber" wire:loading.attr="disabled" class="btn btn-primary">Adicionar</button>
                                     </div>
                                 </div>
                                 @error('manualNumber')
@@ -71,7 +76,7 @@
                     <!-- Drawn Numbers Grid -->
                     <div class="row">
                         <div class="col-12">
-                            <h5>Números Sorteados ({{ count($drawnNumbers) }})</h5>
+                            <h5>Números Sorteados da Rodada {{ $roundNumber }} ({{ count($drawnNumbers) }})</h5>
                             <div class="d-flex flex-wrap mt-3" style="gap: 8px;">
                                 @for($i = $bingo->number_range_start; $i <= $bingo->number_range_end; $i++)
                                     <div class="text-center" style="width: 40px;">
@@ -141,7 +146,7 @@
                         @if(!$winner['is_winner'])
                             <small>Faltando: {{ implode(', ', $winner['missing']) }}</small>
                         @else
-                            <button class="btn btn-sm btn-success mt-2" wire:click="confirmWinner({{ $winner['card']->id }})">
+                            <button class="btn btn-sm btn-success mt-2" wire:click="confirmWinner({{ $winner['card']->id }})" wire:loading.attr="disabled">
                                 <i class="material-icons" style="font-size: 16px;">check</i> Validar Ganhador
                             </button>
                         @endif

@@ -8,6 +8,7 @@ use App\Models\Card;
 use App\Models\Responsible;
 use App\Services\CardGeneratorService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class CardController extends Controller
 {
@@ -60,11 +61,20 @@ class CardController extends Controller
             return back()->with('falha', 'Só é possível gerar cartelas para bingos em preparação.');
         }
 
-        $cards = $this->cardGenerator->generate($bingo, $validated['quantity']);
-        
-        $bingo->update(['card_quantity' => $bingo->cards()->count()]);
+        $lock = Cache::lock('generate-cards-bingo-' . $bingo->id, 30);
 
-        return redirect()->route('cards.index', ['bingo_id' => $bingo->id])
+        if (!$lock->get()) {
+            return back()->with('falha', 'As cartelas deste bingo já estão sendo geradas. Aguarde alguns segundos.');
+        }
+
+        try {
+            $cards = $this->cardGenerator->generate($bingo, $validated['quantity']);
+            $bingo->update(['card_quantity' => $bingo->cards()->count()]);
+        } finally {
+            $lock->release();
+        }
+
+        return redirect()->route('cards.export', ['bingo_id' => $bingo->id, 'print' => 1])
             ->with('sucesso', $cards . ' cartelas geradas com sucesso!');
     }
 
@@ -88,10 +98,16 @@ class CardController extends Controller
             'bingo_id' => 'required|exists:bingos,id',
         ]);
 
-        $bingo = Bingo::with(['cards.numbers', 'cards.responsible'])->findOrFail($validated['bingo_id']);
+        $bingo = Bingo::with(['rounds', 'cards' => function ($query) {
+            $query->orderBy('card_number')->with(['numbers', 'responsible']);
+        }])->findOrFail($validated['bingo_id']);
         
         $pdf = app('dompdf.wrapper');
         $pdf->loadView('pdf.cards', compact('bingo'));
+
+        if ($request->boolean('print')) {
+            return $pdf->stream('cartelas-' . $bingo->name . '.pdf');
+        }
         
         return $pdf->download('cartelas-' . $bingo->name . '.pdf');
     }

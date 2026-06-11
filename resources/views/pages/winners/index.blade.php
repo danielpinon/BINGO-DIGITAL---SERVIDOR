@@ -23,6 +23,7 @@
                             <thead>
                                 <tr>
                                     <th>Bingo</th>
+                                    <th>Rodada</th>
                                     <th>Cartela</th>
                                     <th>Responsável</th>
                                     <th>Padrão</th>
@@ -33,6 +34,7 @@
                                 @forelse($winners as $winner)
                                 <tr>
                                     <td>{{ $winner->bingo->name }}</td>
+                                    <td>{{ $winner->round ? 'Rodada ' . $winner->round->round_number : '-' }}</td>
                                     <td><strong>{{ $winner->card->card_number }}</strong></td>
                                     <td>{{ $winner->responsible?->name ?: '-' }}</td>
                                     <td>{{ $winner->prizePattern->name }}</td>
@@ -40,7 +42,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="5" class="text-center py-4">
+                                    <td colspan="6" class="text-center py-4">
                                         <i class="material-icons" style="font-size: 48px; color: #cbd5e1;">emoji_events</i>
                                         <p class="mt-2 text-muted">Nenhum ganhador registrado ainda.</p>
                                     </td>

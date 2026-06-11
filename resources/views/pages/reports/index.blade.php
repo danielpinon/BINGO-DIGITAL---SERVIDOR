@@ -233,20 +233,13 @@
                         <h5 class="mb-3">Padrões de Prêmio</h5>
                         <div class="table-responsive mb-4">
                             <table class="table table-hover">
-                                <thead><tr><th>Nome</th><th>Tipo</th><th>Ordem</th><th>Status</th></tr></thead>
+                                <thead><tr><th>Nome</th><th>Tipo</th><th>Ordem</th></tr></thead>
                                 <tbody>
                                     @foreach($bingoReport->prizePatterns as $pattern)
                                         <tr>
                                             <td>{{ $pattern->name }}</td>
                                             <td>{{ $pattern->pattern_type }}</td>
                                             <td>{{ $pattern->pattern_order }}</td>
-                                            <td>
-                                                @if($pattern->is_completed)
-                                                    <span class="badge badge-success">Concluído</span>
-                                                @else
-                                                    <span class="badge badge-primary">Pendente</span>
-                                                @endif
-                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>

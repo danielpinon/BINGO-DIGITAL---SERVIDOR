@@ -3,7 +3,7 @@
   <div class="container-fluid">
     <div class="navbar-wrapper d-flex align-items-center">
       <a class="navbar-brand d-flex align-items-center" href="#" style="gap: 10px;">
-        <i class="material-icons" style="font-size: 28px; color: var(--bingo-accent);">grid_on</i>
+        <img src="{{ asset('material/img/new_logo.png') }}" alt="Logo" style="width: 32px; height: 32px; object-fit: contain; border-radius: 6px; background: #fff; padding: 2px;">
         <span style="font-weight: 700; color: var(--bingo-primary);">BINGO DIGITAL</span>
       </a>
     </div>
