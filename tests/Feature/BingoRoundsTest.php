@@ -47,7 +47,7 @@ class BingoRoundsTest extends TestCase
         }
     }
 
-    public function test_card_generation_redirects_to_printable_pdf_and_keeps_one_card_set_for_all_rounds(): void
+    public function test_card_generation_prepares_pdf_and_keeps_one_card_set_for_all_rounds(): void
     {
         $user = User::factory()->create();
         $bingo = $this->createBingoWithRounds($user, 3);
@@ -57,9 +57,11 @@ class BingoRoundsTest extends TestCase
             'quantity' => 4,
         ]);
 
-        $response->assertRedirect(route('cards.export', ['bingo_id' => $bingo->id, 'print' => 1]));
+        $response->assertRedirect(route('cards.index', ['bingo_id' => $bingo->id]));
         $this->assertSame(4, $bingo->cards()->count());
         $this->assertSame(3, $bingo->rounds()->count());
+
+        app(\App\Services\BingoCardsPdfService::class)->generate($bingo->refresh());
 
         $pdfResponse = $this->actingAs($user)->get(route('cards.export', ['bingo_id' => $bingo->id, 'print' => 1]));
         $pdfResponse->assertOk();

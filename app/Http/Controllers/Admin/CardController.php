@@ -3,20 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\GenerateBingoCardsPdf;
 use App\Models\Bingo;
 use App\Models\Card;
 use App\Models\Responsible;
+use App\Services\BingoCardsPdfService;
 use App\Services\CardGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class CardController extends Controller
 {
     protected $cardGenerator;
+    protected $pdfService;
 
-    public function __construct(CardGeneratorService $cardGenerator)
+    public function __construct(CardGeneratorService $cardGenerator, BingoCardsPdfService $pdfService)
     {
         $this->cardGenerator = $cardGenerator;
+        $this->pdfService = $pdfService;
     }
 
     public function index(Request $request)
@@ -70,12 +75,14 @@ class CardController extends Controller
         try {
             $cards = $this->cardGenerator->generate($bingo, $validated['quantity']);
             $bingo->update(['card_quantity' => $bingo->cards()->count()]);
+            $this->pdfService->markPending($bingo);
+            GenerateBingoCardsPdf::dispatch($bingo->id)->afterResponse();
         } finally {
             $lock->release();
         }
 
-        return redirect()->route('cards.export', ['bingo_id' => $bingo->id, 'print' => 1])
-            ->with('sucesso', $cards . ' cartelas geradas com sucesso!');
+        return redirect()->route('cards.index', ['bingo_id' => $bingo->id])
+            ->with('sucesso', $cards . ' cartelas geradas com sucesso! O PDF será preparado em segundo plano.');
     }
 
     public function assign(Request $request, Card $card)
@@ -89,7 +96,10 @@ class CardController extends Controller
             'status' => 'distributed',
         ]);
 
-        return back()->with('sucesso', 'Cartela atribuída com sucesso!');
+        $this->pdfService->markPending($card->bingo);
+        GenerateBingoCardsPdf::dispatch($card->bingo_id)->afterResponse();
+
+        return back()->with('sucesso', 'Cartela atribuída com sucesso! O PDF será atualizado em segundo plano.');
     }
 
     public function export(Request $request)
@@ -98,17 +108,31 @@ class CardController extends Controller
             'bingo_id' => 'required|exists:bingos,id',
         ]);
 
-        $bingo = Bingo::with(['rounds', 'cards' => function ($query) {
-            $query->orderBy('card_number')->with(['numbers', 'responsible']);
-        }])->findOrFail($validated['bingo_id']);
-        
-        $pdf = app('dompdf.wrapper');
-        $pdf->loadView('pdf.cards', compact('bingo'));
+        $bingo = Bingo::findOrFail($validated['bingo_id']);
 
-        if ($request->boolean('print')) {
-            return $pdf->stream('cartelas-' . $bingo->name . '.pdf');
+        if ($bingo->cards_pdf_path && Storage::disk('local')->exists($bingo->cards_pdf_path)) {
+            $path = Storage::disk('local')->path($bingo->cards_pdf_path);
+            $filename = $this->pdfService->filename($bingo);
+
+            if ($request->boolean('print')) {
+                return response()->file($path, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="' . $filename . '"',
+                ]);
+            }
+
+            return response()->download($path, $filename, [
+                'Content-Type' => 'application/pdf',
+            ]);
         }
-        
-        return $pdf->download('cartelas-' . $bingo->name . '.pdf');
+
+        if ($bingo->cards_pdf_status !== 'processing') {
+            $this->pdfService->markPending($bingo);
+            GenerateBingoCardsPdf::dispatch($bingo->id)->afterResponse();
+        }
+
+        return redirect()
+            ->route('bingos.index')
+            ->with('sucesso', 'O PDF das cartelas está sendo gerado em segundo plano. Tente baixar novamente em alguns instantes.');
     }
 }

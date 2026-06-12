@@ -3,16 +3,21 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\GenerateBingoCardsPdf;
 use App\Models\Bingo;
 use App\Models\BingoPrizePattern;
 use App\Models\BingoRound;
+use App\Services\BingoCardsPdfService;
 use App\Services\CardGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class BingoController extends Controller
 {
-    public function __construct(private CardGeneratorService $cardGenerator)
+    public function __construct(
+        private CardGeneratorService $cardGenerator,
+        private BingoCardsPdfService $pdfService
+    )
     {
     }
 
@@ -94,10 +99,12 @@ class BingoController extends Controller
         $this->syncRounds($bingo, (int) $validated['round_quantity']);
         $generatedCards = $this->cardGenerator->generate($bingo, (int) $validated['card_quantity']);
         $bingo->update(['card_quantity' => $bingo->cards()->count()]);
+        $this->pdfService->markPending($bingo);
+        GenerateBingoCardsPdf::dispatch($bingo->id)->afterResponse();
 
         return redirect()
             ->route('bingos.index')
-            ->with('sucesso', 'Bingo criado com sucesso! ' . $generatedCards . ' cartelas geradas.');
+            ->with('sucesso', 'Bingo criado com sucesso! ' . $generatedCards . ' cartelas geradas. O PDF será preparado em segundo plano.');
     }
 
     public function show(Bingo $bingo)
@@ -134,10 +141,19 @@ class BingoController extends Controller
             'cards_per_page' => 'required|integer|min:1|max:6',
         ]);
 
+        $pdfShouldRegenerate = $bingo->name !== $validated['name']
+            || (int) $bingo->round_quantity !== (int) $validated['round_quantity']
+            || (int) $bingo->cards_per_page !== (int) $validated['cards_per_page'];
+
         $bingo->update($validated);
 
         if ($bingo->status === 'preparation') {
             $this->syncRounds($bingo, (int) $validated['round_quantity']);
+        }
+
+        if ($pdfShouldRegenerate && $bingo->cards()->exists()) {
+            $this->pdfService->markPending($bingo);
+            GenerateBingoCardsPdf::dispatch($bingo->id)->afterResponse();
         }
 
         return redirect()->route('bingos.index')->with('sucesso', 'Bingo atualizado com sucesso!');

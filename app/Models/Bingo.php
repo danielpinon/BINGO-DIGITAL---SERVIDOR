@@ -13,12 +13,14 @@ class Bingo extends Model
         'name', 'description', 'event_date', 'event_time',
         'number_range_start', 'number_range_end',
         'card_quantity', 'numbers_per_card', 'round_quantity', 'cards_per_page',
+        'cards_pdf_path', 'cards_pdf_status', 'cards_pdf_generated_at',
         'status', 'current_prize_pattern_id', 'created_by'
     ];
 
     protected $casts = [
         'event_date' => 'date',
         'event_time' => 'datetime:H:i',
+        'cards_pdf_generated_at' => 'datetime',
     ];
 
     public function creator()
