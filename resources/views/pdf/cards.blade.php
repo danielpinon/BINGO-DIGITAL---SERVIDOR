@@ -16,14 +16,16 @@
             padding-bottom: 3mm;
         }
         .pdf-logo {
+            display: block;
             width: 48mm;
             height: auto;
-            margin-bottom: 1mm;
+            margin: 0 auto 2mm;
         }
         .pdf-title {
-            color: #1e3a8a;
-            font-size: 16px;
+            color: #111827;
+            font-size: 18px;
             font-weight: bold;
+            letter-spacing: 2px;
             margin-bottom: 1mm;
         }
         .pdf-subtitle {
@@ -87,8 +89,9 @@
         <div class="page">
             <div class="pdf-header">
                 <img src="{{ public_path('material/img/fenix-logo.png') }}" class="pdf-logo" alt="Fênix Motocenter">
-                <div class="pdf-title">{{ $bingo->name }}</div>
+                <div class="pdf-title">B I N G O</div>
                 <div class="pdf-subtitle">
+                    {{ $bingo->name }} |
                     {{ $bingo->round_quantity }} rodadas usando as mesmas cartelas |
                     {{ $copiesPerPage }} {{ $copiesPerPage === 1 ? 'cartela' : 'cartelas' }} por página
                 </div>
