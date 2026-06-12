@@ -122,6 +122,9 @@
                                             <a href="{{ route('bingos.edit', $bingo) }}" class="btn btn-sm btn-warning" title="Editar">
                                                 <i class="material-icons">edit</i>
                                             </a>
+                                            <a href="{{ route('cards.export', ['bingo_id' => $bingo->id]) }}" class="btn btn-sm btn-secondary" title="Baixar PDF das Cartelas">
+                                                <i class="material-icons">picture_as_pdf</i>
+                                            </a>
                                             @if($bingo->status === 'preparation')
                                                 <form action="{{ route('bingos.start', $bingo) }}" method="POST" class="d-inline">
                                                     @csrf

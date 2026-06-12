@@ -10,6 +10,9 @@
                     <small class="text-muted">Detalhes do evento</small>
                 </div>
                 <div class="d-flex" style="gap: 8px;">
+                    <a href="{{ route('cards.export', ['bingo_id' => $bingo->id]) }}" class="btn btn-info btn-sm">
+                        <i class="material-icons">picture_as_pdf</i> PDF
+                    </a>
                     <a href="{{ route('bingos.edit', $bingo) }}" class="btn btn-warning btn-sm">
                         <i class="material-icons">edit</i> Editar
                     </a>
@@ -70,7 +73,8 @@
                         <p class="mb-2"><strong>Descrição:</strong> {{ $bingo->description ?: 'Sem descrição' }}</p>
                         <p class="mb-2"><strong>Intervalo de números:</strong> {{ $bingo->number_range_start }} até {{ $bingo->number_range_end }}</p>
                         <p class="mb-2"><strong>Números por cartela:</strong> {{ $bingo->numbers_per_card }}</p>
-                        <p class="mb-0"><strong>Sorteios/Rodadas:</strong> {{ $bingo->round_quantity }}</p>
+                        <p class="mb-2"><strong>Sorteios/Rodadas:</strong> {{ $bingo->round_quantity }}</p>
+                        <p class="mb-0"><strong>Cartelas por página no PDF:</strong> {{ $bingo->cards_per_page ?? 1 }}</p>
                     </div>
                 </div>
 

@@ -6,11 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\Bingo;
 use App\Models\BingoPrizePattern;
 use App\Models\BingoRound;
+use App\Services\CardGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class BingoController extends Controller
 {
+    public function __construct(private CardGeneratorService $cardGenerator)
+    {
+    }
+
     public function index()
     {
         $bingos = Bingo::withCount('cards')->withCount('winners')->orderBy('created_at', 'desc')->paginate(10);
@@ -48,7 +53,8 @@ class BingoController extends Controller
             'number_range_end' => 'required|integer|gt:number_range_start',
             'card_quantity' => 'required|integer|min:1',
             'numbers_per_card' => 'required|integer|min:1',
-            'round_quantity' => 'required|integer|min:1|max:5',
+            'round_quantity' => 'required|integer|min:3|max:5',
+            'cards_per_page' => 'required|integer|min:1|max:6',
             'prize_patterns' => 'required|array|min:1',
             'prize_patterns.*' => 'required|string|in:line,quina,full_card,cross,corners',
         ]);
@@ -63,6 +69,7 @@ class BingoController extends Controller
             'card_quantity' => $validated['card_quantity'],
             'numbers_per_card' => $validated['numbers_per_card'],
             'round_quantity' => $validated['round_quantity'],
+            'cards_per_page' => $validated['cards_per_page'],
             'status' => 'preparation',
             'created_by' => Auth::id(),
         ]);
@@ -85,8 +92,12 @@ class BingoController extends Controller
         }
 
         $this->syncRounds($bingo, (int) $validated['round_quantity']);
+        $generatedCards = $this->cardGenerator->generate($bingo, (int) $validated['card_quantity']);
+        $bingo->update(['card_quantity' => $bingo->cards()->count()]);
 
-        return redirect()->route('bingos.index')->with('sucesso', 'Bingo criado com sucesso!');
+        return redirect()
+            ->route('bingos.index')
+            ->with('sucesso', 'Bingo criado com sucesso! ' . $generatedCards . ' cartelas geradas.');
     }
 
     public function show(Bingo $bingo)
@@ -119,7 +130,8 @@ class BingoController extends Controller
             'number_range_end' => 'required|integer|gt:number_range_start',
             'card_quantity' => 'required|integer|min:1',
             'numbers_per_card' => 'required|integer|min:1',
-            'round_quantity' => 'required|integer|min:1|max:5',
+            'round_quantity' => 'required|integer|min:3|max:5',
+            'cards_per_page' => 'required|integer|min:1|max:6',
         ]);
 
         $bingo->update($validated);

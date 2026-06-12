@@ -12,7 +12,7 @@ class Bingo extends Model
     protected $fillable = [
         'name', 'description', 'event_date', 'event_time',
         'number_range_start', 'number_range_end',
-        'card_quantity', 'numbers_per_card', 'round_quantity',
+        'card_quantity', 'numbers_per_card', 'round_quantity', 'cards_per_page',
         'status', 'current_prize_pattern_id', 'created_by'
     ];
 

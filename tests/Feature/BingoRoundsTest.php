@@ -18,11 +18,11 @@ class BingoRoundsTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_bingo_can_be_created_with_up_to_five_rounds(): void
+    public function test_bingo_can_be_created_with_three_to_five_rounds_and_generates_cards(): void
     {
         $user = User::factory()->create();
 
-        foreach ([1, 3, 5] as $roundQuantity) {
+        foreach ([3, 5] as $roundQuantity) {
             $response = $this->actingAs($user)->post(route('bingos.store'), [
                 'name' => 'Bingo ' . $roundQuantity,
                 'description' => null,
@@ -33,6 +33,7 @@ class BingoRoundsTest extends TestCase
                 'card_quantity' => 10,
                 'numbers_per_card' => 25,
                 'round_quantity' => $roundQuantity,
+                'cards_per_page' => 2,
                 'prize_patterns' => ['line'],
             ]);
 
@@ -40,7 +41,9 @@ class BingoRoundsTest extends TestCase
 
             $bingo = Bingo::where('name', 'Bingo ' . $roundQuantity)->firstOrFail();
             $this->assertSame($roundQuantity, (int) $bingo->round_quantity);
+            $this->assertSame(2, (int) $bingo->cards_per_page);
             $this->assertSame($roundQuantity, $bingo->rounds()->count());
+            $this->assertSame(10, $bingo->cards()->count());
         }
     }
 

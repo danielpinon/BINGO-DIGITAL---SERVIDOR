@@ -454,17 +454,63 @@ select.form-control {
 }
 
 /* ===== PAGINATION ===== */
+.pagination {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 0;
+}
+
 .pagination .page-link {
-    border: none;
+    border: 1px solid var(--bingo-border);
     color: var(--bingo-text-dark);
     font-weight: 600;
     border-radius: 8px;
-    margin: 0 3px;
+    margin: 0;
+    min-width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    background: #fff;
 }
 
 .pagination .page-item.active .page-link {
     background: linear-gradient(135deg, var(--bingo-accent) 0%, var(--bingo-secondary) 100%);
-    border: none;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #94a3b8;
+    background: #f8fafc;
+}
+
+.pagination svg {
+    width: 18px;
+    height: 18px;
+    max-width: 18px;
+    max-height: 18px;
+}
+
+.cards-pagination {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0 24px;
+}
+
+.cards-pagination nav,
+.cards-pagination .pagination {
+    max-width: 100%;
+}
+
+.cards-page {
+    overflow-x: hidden;
+}
+
+.cards-page > .container-fluid > .row {
+    position: relative;
 }
 
 /* ===== BINGO CARD GRID ===== */

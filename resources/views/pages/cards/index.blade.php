@@ -1,7 +1,7 @@
 @extends('layouts.app', ['activePage' => 'cards', 'titlePage' => __('Cartelas')])
 
 @section('content')
-<div class="content">
+<div class="content cards-page">
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
@@ -157,7 +157,9 @@
         @if($cards->hasPages())
         <div class="row">
             <div class="col-12">
-                {{ $cards->links() }}
+                <div class="cards-pagination">
+                    {{ $cards->onEachSide(1)->links() }}
+                </div>
             </div>
         </div>
         @endif

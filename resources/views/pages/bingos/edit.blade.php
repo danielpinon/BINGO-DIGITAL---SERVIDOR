@@ -92,12 +92,25 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">Quantidade de Sorteios/Rodadas *</label>
-                                        <input type="number" name="round_quantity" class="form-control @error('round_quantity') is-invalid @enderror" value="{{ old('round_quantity', $bingo->round_quantity) }}" min="1" max="5" required {{ $bingo->status !== 'preparation' ? 'readonly' : '' }}>
+                                        <input type="number" name="round_quantity" class="form-control @error('round_quantity') is-invalid @enderror" value="{{ old('round_quantity', $bingo->round_quantity) }}" min="3" max="5" required {{ $bingo->status !== 'preparation' ? 'readonly' : '' }}>
                                         @error('round_quantity')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror
                                     </div>
                                 </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Cartelas por Página no PDF *</label>
+                                        <input type="number" name="cards_per_page" class="form-control @error('cards_per_page') is-invalid @enderror" value="{{ old('cards_per_page', $bingo->cards_per_page ?? 1) }}" min="1" max="6" required>
+                                        @error('cards_per_page')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                        <small class="text-muted">Quantidade de cópias da mesma cartela por página.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">Intervalo de Números (Início) *</label>
@@ -107,9 +120,6 @@
                                         @enderror
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">Intervalo de Números (Fim) *</label>

@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
     <!-- CSS Files -->
     <link href="{{ asset('material') }}/css/material-dashboard.css?v=2.1.1" rel="stylesheet" />
-    <link href="{{ asset('material') }}/css/custom-bingo.css?v=1.0" rel="stylesheet" />
+    <link href="{{ asset('material') }}/css/custom-bingo.css?v=1.1" rel="stylesheet" />
     @livewireStyles
     @stack('css')
     <style>
