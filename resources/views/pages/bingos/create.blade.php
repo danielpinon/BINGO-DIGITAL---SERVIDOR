@@ -91,7 +91,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">Quantidade de Sorteios/Rodadas *</label>
-                                        <input type="number" name="round_quantity" class="form-control @error('round_quantity') is-invalid @enderror" value="{{ old('round_quantity', 3) }}" min="3" max="5" required>
+                                        <input type="number" name="round_quantity" class="form-control @error('round_quantity') is-invalid @enderror" value="{{ old('round_quantity', 1) }}" min="1" max="5" required>
                                         @error('round_quantity')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror

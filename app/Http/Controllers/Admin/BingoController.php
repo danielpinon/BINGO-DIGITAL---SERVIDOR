@@ -53,7 +53,7 @@ class BingoController extends Controller
             'number_range_end' => 'required|integer|gt:number_range_start',
             'card_quantity' => 'required|integer|min:1',
             'numbers_per_card' => 'required|integer|min:1',
-            'round_quantity' => 'required|integer|min:3|max:5',
+            'round_quantity' => 'required|integer|min:1|max:5',
             'cards_per_page' => 'required|integer|min:1|max:6',
             'prize_patterns' => 'required|array|min:1',
             'prize_patterns.*' => 'required|string|in:line,quina,full_card,cross,corners',
@@ -130,7 +130,7 @@ class BingoController extends Controller
             'number_range_end' => 'required|integer|gt:number_range_start',
             'card_quantity' => 'required|integer|min:1',
             'numbers_per_card' => 'required|integer|min:1',
-            'round_quantity' => 'required|integer|min:3|max:5',
+            'round_quantity' => 'required|integer|min:1|max:5',
             'cards_per_page' => 'required|integer|min:1|max:6',
         ]);
 

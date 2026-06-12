@@ -18,11 +18,11 @@ class BingoRoundsTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_bingo_can_be_created_with_three_to_five_rounds_and_generates_cards(): void
+    public function test_bingo_can_be_created_with_up_to_five_rounds_and_generates_cards(): void
     {
         $user = User::factory()->create();
 
-        foreach ([3, 5] as $roundQuantity) {
+        foreach ([1, 3, 5] as $roundQuantity) {
             $response = $this->actingAs($user)->post(route('bingos.store'), [
                 'name' => 'Bingo ' . $roundQuantity,
                 'description' => null,
