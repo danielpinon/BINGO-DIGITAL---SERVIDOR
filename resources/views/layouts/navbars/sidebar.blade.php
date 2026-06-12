@@ -1,8 +1,7 @@
 <div class="sidebar" data-color="purple" data-background-color="white">
     <div class="logo">
-        <a href="{{ route('admin.home') }}" class="simple-text logo-normal" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 15px;">
-            <img src="{{ asset('material/img/new_logo.png') }}" alt="Logo" style="width: 38px; height: 38px; object-fit: contain; border-radius: 6px; background: #fff; padding: 2px;">
-            <span style="font-weight: 700; font-size: 1.2rem; color: #fff; letter-spacing: 1px;">BINGO DIGITAL</span>
+        <a href="{{ route('admin.home') }}" class="simple-text logo-normal" style="display: flex; align-items: center; justify-content: center; padding: 15px;">
+            <img src="{{ asset('material/img/fenix-logo.png') }}" alt="Fênix Motocenter" style="width: 170px; height: 54px; object-fit: contain; border-radius: 6px; background: #fff; padding: 6px;">
         </a>
         <div style="text-align: center; color: rgba(255,255,255,0.5); font-size: 0.7rem; margin-top: -10px; padding-bottom: 10px; letter-spacing: 2px; text-transform: uppercase;">
             Painel Administrativo

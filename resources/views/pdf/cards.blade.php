@@ -16,7 +16,7 @@
             padding-bottom: 3mm;
         }
         .pdf-logo {
-            width: 34mm;
+            width: 48mm;
             height: auto;
             margin-bottom: 1mm;
         }
@@ -86,7 +86,7 @@
     @foreach($bingo->cards as $card)
         <div class="page">
             <div class="pdf-header">
-                <img src="{{ public_path('material/img/logo.png') }}" class="pdf-logo" alt="Logo">
+                <img src="{{ public_path('material/img/fenix-logo.png') }}" class="pdf-logo" alt="Fênix Motocenter">
                 <div class="pdf-title">{{ $bingo->name }}</div>
                 <div class="pdf-subtitle">
                     {{ $bingo->round_quantity }} rodadas usando as mesmas cartelas |

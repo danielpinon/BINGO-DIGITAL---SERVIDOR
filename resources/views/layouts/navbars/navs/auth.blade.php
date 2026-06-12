@@ -3,8 +3,7 @@
   <div class="container-fluid">
     <div class="navbar-wrapper d-flex align-items-center">
       <a class="navbar-brand d-flex align-items-center" href="#" style="gap: 10px;">
-        <img src="{{ asset('material/img/new_logo.png') }}" alt="Logo" style="width: 32px; height: 32px; object-fit: contain; border-radius: 6px; background: #fff; padding: 2px;">
-        <span style="font-weight: 700; color: var(--bingo-primary);">BINGO DIGITAL</span>
+        <img src="{{ asset('material/img/fenix-logo.png') }}" alt="Fênix Motocenter" style="width: 130px; height: 42px; object-fit: contain; border-radius: 6px; background: #fff; padding: 4px;">
       </a>
     </div>
     <button class="navbar-toggler" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">

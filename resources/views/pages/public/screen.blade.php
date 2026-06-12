@@ -31,7 +31,7 @@
             color: #fbbf24;
         }
         .public-logo {
-            width: 64px;
+            width: 180px;
             height: 64px;
             object-fit: contain;
             border-radius: 8px;
@@ -152,7 +152,7 @@
 <body>
     <div class="public-header">
         <div style="display: flex; align-items: center;">
-            <img src="{{ asset('material/img/logo.png') }}" class="public-logo" alt="Logo">
+            <img src="{{ asset('material/img/fenix-logo.png') }}" class="public-logo" alt="Fênix Motocenter">
             <h1>{{ $bingo->name }}</h1>
         </div>
         <div class="info">
