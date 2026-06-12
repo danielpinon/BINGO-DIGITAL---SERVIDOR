@@ -166,11 +166,15 @@
 
 .card-stats {
     border-radius: 16px;
-    overflow: hidden;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
 }
 
 .card-stats .card-header {
     padding: 15px 20px;
+    position: relative;
+    z-index: 2;
 }
 
 .card-stats .card-header .card-icon {
@@ -180,6 +184,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    z-index: 3;
 }
 
 .card-stats .card-header .card-icon i {
