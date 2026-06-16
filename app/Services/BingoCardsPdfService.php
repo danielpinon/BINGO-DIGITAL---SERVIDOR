@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Bingo;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 class BingoCardsPdfService
 {
@@ -24,23 +25,29 @@ class BingoCardsPdfService
 
         $bingo->forceFill(['cards_pdf_status' => 'processing'])->save();
 
-        $bingo->load(['rounds', 'cards' => function ($query) {
-            $query->orderBy('card_number')->with(['numbers', 'responsible']);
-        }]);
+        try {
+            $bingo->load(['rounds', 'cards' => function ($query) {
+                $query->orderBy('card_number')->with(['numbers', 'responsible']);
+            }]);
 
-        $pdf = app('dompdf.wrapper');
-        $pdf->loadView('pdf.cards', compact('bingo'));
+            $pdf = app('dompdf.wrapper');
+            $pdf->loadView('pdf.cards', compact('bingo'));
 
-        $path = 'bingo-card-pdfs/bingo-' . $bingo->id . '-cartelas.pdf';
-        Storage::disk('local')->put($path, $pdf->output());
+            $path = 'bingo-card-pdfs/bingo-' . $bingo->id . '-cartelas.pdf';
+            Storage::disk('local')->put($path, $pdf->output());
 
-        $bingo->forceFill([
-            'cards_pdf_path' => $path,
-            'cards_pdf_status' => 'ready',
-            'cards_pdf_generated_at' => now(),
-        ])->save();
+            $bingo->forceFill([
+                'cards_pdf_path' => $path,
+                'cards_pdf_status' => 'ready',
+                'cards_pdf_generated_at' => now(),
+            ])->save();
 
-        return $path;
+            return $path;
+        } catch (Throwable $exception) {
+            $bingo->forceFill(['cards_pdf_status' => 'failed'])->save();
+
+            throw $exception;
+        }
     }
 
     public function filename(Bingo $bingo): string

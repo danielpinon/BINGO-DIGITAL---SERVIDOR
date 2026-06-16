@@ -61,10 +61,30 @@ class BingoRoundsTest extends TestCase
         $this->assertSame(4, $bingo->cards()->count());
         $this->assertSame(3, $bingo->rounds()->count());
 
-        app(\App\Services\BingoCardsPdfService::class)->generate($bingo->refresh());
+        $bingo->refresh()->forceFill([
+            'cards_pdf_path' => null,
+            'cards_pdf_status' => 'processing',
+            'cards_pdf_generated_at' => null,
+        ])->save();
 
         $pdfResponse = $this->actingAs($user)->get(route('cards.export', ['bingo_id' => $bingo->id, 'print' => 1]));
         $pdfResponse->assertOk();
+        $this->assertSame('ready', $bingo->refresh()->cards_pdf_status);
+        $this->assertNotNull($bingo->cards_pdf_path);
+    }
+
+    public function test_card_generation_uses_next_available_number_after_existing_gap(): void
+    {
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 1);
+        $generator = app(\App\Services\CardGeneratorService::class);
+
+        $this->assertSame(3, $generator->generate($bingo, 3));
+
+        $bingo->cards()->where('card_number', '002')->firstOrFail()->delete();
+
+        $this->assertSame(1, $generator->generate($bingo->refresh(), 1));
+        $this->assertTrue($bingo->cards()->where('card_number', '004')->exists());
     }
 
     public function test_confirming_last_prize_advances_to_next_round_with_empty_drawn_numbers(): void

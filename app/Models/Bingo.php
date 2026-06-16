@@ -84,4 +84,14 @@ class Bingo extends Model
             default => '<span class="badge badge-secondary">' . $this->status . '</span>',
         };
     }
+
+    public function getCardsPdfBadgeAttribute()
+    {
+        return match($this->cards_pdf_status) {
+            'ready' => '<span class="badge badge-success">PDF Disponível</span>',
+            'processing' => '<span class="badge badge-info">Preparando PDF</span>',
+            'failed' => '<span class="badge badge-danger">PDF com Erro</span>',
+            default => '<span class="badge badge-secondary">Gerar PDF</span>',
+        };
+    }
 }

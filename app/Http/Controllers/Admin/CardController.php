@@ -12,6 +12,7 @@ use App\Services\CardGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class CardController extends Controller
 {
@@ -126,13 +127,42 @@ class CardController extends Controller
             ]);
         }
 
-        if ($bingo->cards_pdf_status !== 'processing') {
-            $this->pdfService->markPending($bingo);
-            GenerateBingoCardsPdf::dispatch($bingo->id)->afterResponse();
+        if (!$bingo->cards()->exists()) {
+            return redirect()
+                ->route('bingos.index')
+                ->with('falha', 'Este bingo ainda não possui cartelas para gerar o PDF.');
         }
 
-        return redirect()
-            ->route('bingos.index')
-            ->with('sucesso', 'O PDF das cartelas está sendo gerado em segundo plano. Tente baixar novamente em alguns instantes.');
+        $lock = Cache::lock('generate-cards-pdf-bingo-' . $bingo->id, 300);
+
+        if (!$lock->get()) {
+            return redirect()
+                ->route('bingos.index')
+                ->with('falha', 'O PDF deste bingo já está sendo gerado. Tente novamente em alguns instantes.');
+        }
+
+        try {
+            $path = Storage::disk('local')->path($this->pdfService->generate($bingo));
+            $filename = $this->pdfService->filename($bingo->refresh());
+
+            if ($request->boolean('print')) {
+                return response()->file($path, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="' . $filename . '"',
+                ]);
+            }
+
+            return response()->download($path, $filename, [
+                'Content-Type' => 'application/pdf',
+            ]);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return redirect()
+                ->route('bingos.index')
+                ->with('falha', 'Não foi possível gerar o PDF das cartelas. Verifique os dados do bingo e tente novamente.');
+        } finally {
+            $lock->release();
+        }
     }
 }

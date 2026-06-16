@@ -112,7 +112,10 @@
                                         {{ $bingo->event_date->format('d/m/Y') }}
                                         <br><small class="text-muted">{{ $bingo->event_time->format('H:i') }}</small>
                                     </td>
-                                    <td>{{ $bingo->cards_count }}</td>
+                                    <td>
+                                        {{ $bingo->cards_count }}
+                                        <br><small>{!! $bingo->cards_pdf_badge !!}</small>
+                                    </td>
                                     <td>{!! $bingo->status_badge !!}</td>
                                     <td>
                                         <div class="d-flex" style="gap: 5px;">

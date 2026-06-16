@@ -1,9 +1,9 @@
 <div class="sidebar" data-color="purple" data-background-color="white">
     <div class="logo">
-        <a href="{{ route('admin.home') }}" class="simple-text logo-normal" style="display: flex; align-items: center; justify-content: center; padding: 15px;">
-            <img src="{{ asset('material/img/fenix-logo.png') }}" alt="Fênix Motocenter" style="width: 170px; height: 54px; object-fit: contain; border-radius: 6px; background: #fff; padding: 6px;">
+        <a href="{{ route('admin.home') }}" class="simple-text logo-normal sidebar-brand-link">
+            <img src="{{ asset('material/img/fenix-logo.png') }}" alt="Fênix Motocenter" class="app-logo app-logo-sidebar">
         </a>
-        <div style="text-align: center; color: rgba(255,255,255,0.5); font-size: 0.7rem; margin-top: -10px; padding-bottom: 10px; letter-spacing: 2px; text-transform: uppercase;">
+        <div class="sidebar-brand-caption">
             Painel Administrativo
         </div>
     </div>
