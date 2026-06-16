@@ -240,6 +240,42 @@ class BingoRoundsTest extends TestCase
         $response->assertDontSee('Responsável');
     }
 
+    public function test_public_screen_state_returns_latest_drawn_numbers_for_realtime_updates(): void
+    {
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 1);
+        $pattern = $bingo->prizePatterns()->first();
+        $round = $bingo->rounds()->first();
+
+        $bingo->update([
+            'status' => 'ongoing',
+            'current_prize_pattern_id' => $pattern->id,
+        ]);
+
+        $round->update([
+            'status' => 'ongoing',
+            'current_prize_pattern_id' => $pattern->id,
+            'started_at' => now(),
+        ]);
+
+        foreach ([3, 21] as $number) {
+            DrawnNumber::create([
+                'bingo_id' => $bingo->id,
+                'bingo_round_id' => $round->id,
+                'number' => $number,
+                'drawn_at' => now()->addSeconds($number),
+            ]);
+        }
+
+        $response = $this->getJson(route('public.screen.state', $bingo));
+
+        $response->assertOk()
+            ->assertJsonPath('round.id', $round->id)
+            ->assertJsonPath('round.number', 1)
+            ->assertJsonPath('drawn_numbers', [3, 21])
+            ->assertJsonPath('last_drawn.number', 21);
+    }
+
     private function createBingoWithRounds(User $user, int $roundQuantity): Bingo
     {
         $bingo = Bingo::create([

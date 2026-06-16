@@ -255,7 +255,7 @@
             <div class="info">
                 <div><i class="material-icons" style="font-size: 18px; vertical-align: middle;">event</i> {{ $bingo->event_date->format('d/m/Y') }}</div>
                 <div><i class="material-icons" style="font-size: 18px; vertical-align: middle;">access_time</i> {{ \Carbon\Carbon::parse($bingo->event_time)->format('H:i') }}</div>
-                <div>RODADA {{ $round?->round_number ?? 1 }} DE {{ $bingo->round_quantity }}</div>
+                <div id="public-round-label">RODADA {{ $round?->round_number ?? 1 }} DE {{ $bingo->round_quantity }}</div>
                 <div><span style="color: #10b981;">●</span> EM ANDAMENTO</div>
             </div>
         </div>
@@ -264,27 +264,28 @@
             <main class="draw-panel">
                 <div class="last-number-section">
                     <div class="last-number-label">Último Número Sorteado</div>
-                    @if($lastDrawn)
-                        <div class="last-number-value">{{ str_pad($lastDrawn->number, 2, '0', STR_PAD_LEFT) }}</div>
-                        <div style="margin-top: 8px; color: rgba(255,255,255,0.5);">
+                    <div id="last-number-value" class="last-number-value" style="{{ $lastDrawn ? '' : 'color: rgba(255,255,255,0.2);' }}">
+                        {{ $lastDrawn ? str_pad($lastDrawn->number, 2, '0', STR_PAD_LEFT) : '--' }}
+                    </div>
+                    <div id="last-number-time" style="margin-top: 8px; color: rgba(255,255,255,0.5);">
+                        @if($lastDrawn)
                             Sorteado às {{ $lastDrawn->drawn_at->format('H:i:s') }}
-                        </div>
-                    @else
-                        <div class="last-number-value" style="color: rgba(255,255,255,0.2);">--</div>
-                        <div style="margin-top: 8px; color: rgba(255,255,255,0.5);">Aguarde o início do sorteio</div>
-                    @endif
+                        @else
+                            Aguarde o início do sorteio
+                        @endif
+                    </div>
                 </div>
 
-                <div class="number-grid">
+                <div class="number-grid" id="number-grid">
                     @for($i = $bingo->number_range_start; $i <= $bingo->number_range_end; $i++)
-                        <div class="number-grid-item {{ in_array($i, $drawnNumbersList) ? 'drawn' : '' }} {{ $lastDrawn && $lastDrawn->number == $i ? 'recent' : '' }}">
+                        <div class="number-grid-item {{ in_array($i, $drawnNumbersList) ? 'drawn' : '' }} {{ $lastDrawn && $lastDrawn->number == $i ? 'recent' : '' }}" data-number="{{ $i }}">
                             {{ str_pad($i, 2, '0', STR_PAD_LEFT) }}
                         </div>
                     @endfor
                 </div>
             </main>
 
-            <aside class="side-panel">
+            <aside class="side-panel" id="close-panel">
                 @if(count($possibleWinners) > 0)
                     <div class="close-section">
                         <div class="close-card">
@@ -322,9 +323,142 @@
 
     @livewireScripts
     <script>
-        setTimeout(function() {
-            window.location.reload();
-        }, 5000);
+        (function() {
+            const stateUrl = @json(route('public.screen.state', $bingo));
+            const streamUrl = @json(route('public.screen.stream', $bingo));
+            const numberGrid = document.getElementById('number-grid');
+            const lastNumberValue = document.getElementById('last-number-value');
+            const lastNumberTime = document.getElementById('last-number-time');
+            const roundLabel = document.getElementById('public-round-label');
+            const closePanel = document.getElementById('close-panel');
+            let lastSignature = '';
+            let isUpdating = false;
+            let fallbackTimer = null;
+
+            function padNumber(number) {
+                return String(number).padStart(2, '0');
+            }
+
+            function renderClosePanel(possibleWinners) {
+                if (!possibleWinners.length) {
+                    closePanel.innerHTML = '<div class="empty-close">Nenhuma cartela perto de bater no momento</div>';
+                    return;
+                }
+
+                const rows = possibleWinners.map(function(missingNumbers) {
+                    const numbers = missingNumbers.map(function(number) {
+                        return '<div class="missing-number">' + padNumber(number) + '</div>';
+                    }).join('');
+
+                    return '<div class="close-row">' +
+                        '<div class="close-row-title">' +
+                            '<span>Faltando</span>' +
+                            '<span class="close-row-badge">' + missingNumbers.length + '</span>' +
+                        '</div>' +
+                        '<div class="missing-numbers">' + numbers + '</div>' +
+                    '</div>';
+                }).join('');
+
+                closePanel.innerHTML = '<div class="close-section">' +
+                    '<div class="close-card">' +
+                        '<h3><i class="material-icons" style="font-size: 24px; vertical-align: middle;">campaign</i> Tem cartela perto de bater</h3>' +
+                        '<div class="close-list">' + rows + '</div>' +
+                    '</div>' +
+                '</div>';
+            }
+
+            function applyState(state) {
+                const signature = JSON.stringify({
+                    round: state.round ? state.round.id : null,
+                    prize: state.round ? state.round.prize : null,
+                    drawn: state.drawn_numbers,
+                    last: state.last_drawn,
+                    winners: state.possible_winners,
+                });
+
+                if (signature === lastSignature) {
+                    return;
+                }
+
+                lastSignature = signature;
+
+                if (state.round) {
+                    roundLabel.textContent = 'RODADA ' + state.round.number + ' DE ' + state.bingo.round_quantity;
+                }
+
+                const drawnSet = new Set(state.drawn_numbers);
+                const lastNumber = state.last_drawn ? state.last_drawn.number : null;
+                numberGrid.querySelectorAll('.number-grid-item').forEach(function(item) {
+                    const number = Number(item.dataset.number);
+                    item.classList.toggle('drawn', drawnSet.has(number));
+                    item.classList.toggle('recent', lastNumber === number);
+                });
+
+                if (state.last_drawn) {
+                    lastNumberValue.textContent = padNumber(state.last_drawn.number);
+                    lastNumberValue.style.color = '';
+                    lastNumberTime.textContent = 'Sorteado às ' + state.last_drawn.time;
+                } else {
+                    lastNumberValue.textContent = '--';
+                    lastNumberValue.style.color = 'rgba(255,255,255,0.2)';
+                    lastNumberTime.textContent = 'Aguarde o início do sorteio';
+                }
+
+                renderClosePanel(state.possible_winners);
+            }
+
+            async function updateScreen() {
+                if (isUpdating) {
+                    return;
+                }
+
+                isUpdating = true;
+
+                try {
+                    const response = await fetch(stateUrl, {
+                        cache: 'no-store',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Erro ao atualizar tela');
+                    }
+
+                    applyState(await response.json());
+                } catch (error) {
+                    console.warn(error);
+                } finally {
+                    isUpdating = false;
+                }
+            }
+
+            function startFallback() {
+                if (fallbackTimer) {
+                    return;
+                }
+
+                updateScreen();
+                fallbackTimer = setInterval(updateScreen, 2500);
+            }
+
+            if ('EventSource' in window) {
+                const stream = new EventSource(streamUrl);
+
+                stream.addEventListener('screen-state', function(event) {
+                    applyState(JSON.parse(event.data));
+                });
+
+                stream.onerror = function() {
+                    stream.close();
+                    startFallback();
+                };
+            } else {
+                startFallback();
+            }
+        })();
     </script>
 </body>
 </html>

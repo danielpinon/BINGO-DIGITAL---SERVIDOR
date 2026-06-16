@@ -136,5 +136,5 @@ Route::post('email/resend', 'Auth\VerificationController@resend')->name('verific
 
 // Tela Pública (sem auth)
 Route::get('bingo/{bingo}/tela', 'Admin\PublicScreenController@show')->name('public.screen');
-
-
+Route::get('bingo/{bingo}/tela/estado', 'Admin\PublicScreenController@state')->name('public.screen.state');
+Route::get('bingo/{bingo}/tela/stream', 'Admin\PublicScreenController@stream')->name('public.screen.stream');
