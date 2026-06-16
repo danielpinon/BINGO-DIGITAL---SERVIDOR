@@ -143,13 +143,60 @@
                             <br>
                         @endif
                         
+                        <div class="d-flex flex-wrap align-items-center mt-2" style="gap: 8px;">
+                            <button type="button" class="btn btn-sm btn-outline-primary mb-0" data-toggle="modal" data-target="#winnerCardModal{{ $winner['card']->id }}">
+                                <i class="material-icons" style="font-size: 16px;">visibility</i> Ver Cartela
+                            </button>
+
                         @if(!$winner['is_winner'])
                             <small>Faltando: {{ implode(', ', $winner['missing']) }}</small>
                         @else
-                            <button class="btn btn-sm btn-success mt-2" wire:click="confirmWinner({{ $winner['card']->id }})" wire:loading.attr="disabled">
+                            <button class="btn btn-sm btn-success mb-0" wire:click="confirmWinner({{ $winner['card']->id }})" wire:loading.attr="disabled">
                                 <i class="material-icons" style="font-size: 16px;">check</i> Validar Ganhador
                             </button>
                         @endif
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="winnerCardModal{{ $winner['card']->id }}" tabindex="-1" role="dialog" aria-labelledby="winnerCardModalLabel{{ $winner['card']->id }}" wire:ignore.self>
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <div>
+                                        <h5 class="modal-title" id="winnerCardModalLabel{{ $winner['card']->id }}">Cartela {{ $winner['card']->card_number }}</h5>
+                                        @if($winner['card']->responsible)
+                                            <small class="text-muted">Resp: {{ $winner['card']->responsible->name }}</small>
+                                        @endif
+                                    </div>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="winner-card-grid">
+                                        @foreach($winner['card']->grid as $row => $cols)
+                                            @foreach($cols as $col => $number)
+                                                @php
+                                                    $isDrawn = in_array($number, $drawnNumbers);
+                                                    $isMissing = in_array($number, $winner['missing']);
+                                                @endphp
+                                                <div class="winner-card-number {{ $isDrawn ? 'drawn' : '' }} {{ $isMissing ? 'missing' : '' }}">
+                                                    {{ str_pad($number, 2, '0', STR_PAD_LEFT) }}
+                                                </div>
+                                            @endforeach
+                                        @endforeach
+                                    </div>
+
+                                    <div class="winner-card-legend mt-3">
+                                        <span><i class="winner-card-dot drawn"></i> Sorteado</span>
+                                        <span><i class="winner-card-dot missing"></i> Faltando</span>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-primary" data-dismiss="modal">Fechar</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     @endforeach
                 </div>

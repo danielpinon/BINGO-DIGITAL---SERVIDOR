@@ -636,6 +636,76 @@ select.form-control {
     animation: pulse 1.5s infinite;
 }
 
+.winner-card-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    width: min(100%, 420px);
+    margin: 0 auto;
+}
+
+.winner-card-number {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+    color: var(--bingo-text-dark);
+    font-size: clamp(1rem, 4vw, 1.45rem);
+    font-weight: 800;
+}
+
+.winner-card-number.drawn {
+    border-color: var(--bingo-accent);
+    background: linear-gradient(135deg, var(--bingo-accent) 0%, var(--bingo-secondary) 100%);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.22);
+}
+
+.winner-card-number.missing {
+    border-color: var(--bingo-gold-dark);
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.winner-card-number.drawn.missing {
+    border-color: var(--bingo-accent);
+    color: #fff;
+}
+
+.winner-card-legend {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.winner-card-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.winner-card-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    background: #e2e8f0;
+}
+
+.winner-card-dot.drawn {
+    background: var(--bingo-accent);
+}
+
+.winner-card-dot.missing {
+    background: var(--bingo-gold-dark);
+}
+
 @keyframes pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
