@@ -156,6 +156,53 @@ class BingoRoundsTest extends TestCase
         $this->assertSame(0, DrawnNumber::where('bingo_round_id', $roundTwo->id)->count());
     }
 
+    public function test_confirming_prize_advances_to_next_pattern_with_empty_drawn_numbers(): void
+    {
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 1);
+        $firstPattern = $bingo->prizePatterns()->first();
+        $nextPattern = BingoPrizePattern::create([
+            'bingo_id' => $bingo->id,
+            'name' => 'Cruz',
+            'pattern_type' => 'cross',
+            'pattern_order' => 2,
+        ]);
+        $round = $bingo->rounds()->first();
+
+        $bingo->update([
+            'status' => 'ongoing',
+            'current_prize_pattern_id' => $firstPattern->id,
+        ]);
+
+        $round->update([
+            'status' => 'ongoing',
+            'current_prize_pattern_id' => $firstPattern->id,
+            'started_at' => now(),
+        ]);
+
+        $card = $this->createWinningLineCard($bingo);
+        foreach ([1, 2, 3, 4, 5] as $number) {
+            DrawnNumber::create([
+                'bingo_id' => $bingo->id,
+                'bingo_round_id' => $round->id,
+                'number' => $number,
+                'drawn_at' => now(),
+            ]);
+        }
+
+        $this->actingAs($user);
+
+        Livewire::test(BingoDraw::class, ['bingoId' => $bingo->id])
+            ->call('confirmWinner', $card->id)
+            ->assertSet('drawnNumbers', [])
+            ->assertSet('lastNumber', null);
+
+        $this->assertSame('ongoing', $round->refresh()->status);
+        $this->assertSame($nextPattern->id, $round->current_prize_pattern_id);
+        $this->assertSame($nextPattern->id, $bingo->refresh()->current_prize_pattern_id);
+        $this->assertSame(0, DrawnNumber::where('bingo_round_id', $round->id)->count());
+    }
+
     public function test_public_screen_hides_card_and_responsible_data_for_close_cards(): void
     {
         $user = User::factory()->create();

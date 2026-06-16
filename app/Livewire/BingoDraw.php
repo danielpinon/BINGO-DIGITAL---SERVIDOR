@@ -196,6 +196,7 @@ class BingoDraw extends Component
                 ->first();
 
             if ($nextPattern) {
+                $round->drawnNumbers()->delete();
                 $round->update(['current_prize_pattern_id' => $nextPattern->id]);
                 $bingo->update(['current_prize_pattern_id' => $nextPattern->id]);
                 return;
