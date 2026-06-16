@@ -14,14 +14,19 @@ class GeneratePendingBingoCardsPdfs extends Command
         {--limit=5 : Quantidade maxima de PDFs gerados por execucao}
         {--bingo= : ID de um bingo especifico}
         {--retry-failed : Inclui PDFs com status failed}
-        {--force : Regenera mesmo se o PDF ja estiver pronto}';
+        {--force : Regenera mesmo se o PDF ja estiver pronto}
+        {--memory=1536M : Limite de memoria usado pelo Dompdf no cron}
+        {--timeout=900 : Tempo maximo em segundos para cada PDF}';
 
     protected $description = 'Gera PDFs de cartelas pendentes ou travados em processamento para execucao via cronjob.';
 
     public function handle(BingoCardsPdfService $pdfService): int
     {
         $limit = max(1, (int) $this->option('limit'));
-        $commandLock = Cache::lock('bingos-generate-card-pdfs-command', 300);
+        $memoryLimit = (string) $this->option('memory');
+        $timeout = max(300, (int) $this->option('timeout'));
+        $lockSeconds = $timeout + 300;
+        $commandLock = Cache::lock('bingos-generate-card-pdfs-command', $lockSeconds);
 
         if (!$commandLock->get()) {
             $this->warn('Outra execucao de geracao de PDFs ja esta em andamento.');
@@ -46,7 +51,7 @@ class GeneratePendingBingoCardsPdfs extends Command
             $failed = 0;
 
             foreach ($bingos as $bingo) {
-                $lock = Cache::lock('generate-cards-pdf-bingo-' . $bingo->id, 300);
+                $lock = Cache::lock('generate-cards-pdf-bingo-' . $bingo->id, $lockSeconds);
 
                 if (!$lock->get()) {
                     $this->warn("Bingo {$bingo->id}: geracao ja em andamento, pulando.");
@@ -55,7 +60,7 @@ class GeneratePendingBingoCardsPdfs extends Command
 
                 try {
                     $this->line("Bingo {$bingo->id}: gerando PDF...");
-                    $path = $pdfService->generate($bingo);
+                    $path = $pdfService->generate($bingo, $memoryLimit, $timeout);
                     $generated++;
                     $this->info("Bingo {$bingo->id}: PDF gerado em {$path}.");
                 } catch (Throwable $exception) {

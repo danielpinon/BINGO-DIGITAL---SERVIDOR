@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('bingos:generate-card-pdfs --limit=3')
             ->everyMinute()
-            ->withoutOverlapping(10);
+            ->withoutOverlapping(30);
     }
 
     /**

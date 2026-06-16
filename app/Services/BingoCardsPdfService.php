@@ -18,10 +18,10 @@ class BingoCardsPdfService
         ])->save();
     }
 
-    public function generate(Bingo $bingo): string
+    public function generate(Bingo $bingo, ?string $memoryLimit = null, ?int $timeout = null): string
     {
-        @set_time_limit(300);
-        @ini_set('memory_limit', '512M');
+        @set_time_limit($timeout ?? 300);
+        @ini_set('memory_limit', $memoryLimit ?? '512M');
 
         $bingo->forceFill(['cards_pdf_status' => 'processing'])->save();
 
