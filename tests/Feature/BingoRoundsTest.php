@@ -11,6 +11,7 @@ use App\Models\CardNumber;
 use App\Models\DrawnNumber;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -71,6 +72,32 @@ class BingoRoundsTest extends TestCase
         $pdfResponse->assertOk();
         $this->assertSame('ready', $bingo->refresh()->cards_pdf_status);
         $this->assertNotNull($bingo->cards_pdf_path);
+    }
+
+    public function test_cron_command_generates_pending_cards_pdf(): void
+    {
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 1);
+        $generator = app(\App\Services\CardGeneratorService::class);
+
+        $this->assertSame(2, $generator->generate($bingo, 2));
+
+        $bingo->forceFill([
+            'cards_pdf_path' => null,
+            'cards_pdf_status' => 'pending',
+            'cards_pdf_generated_at' => null,
+        ])->save();
+
+        $this->artisan('bingos:generate-card-pdfs --limit=1')
+            ->expectsOutputToContain('PDF gerado')
+            ->assertExitCode(0);
+
+        $bingo->refresh();
+        $this->assertSame('ready', $bingo->cards_pdf_status);
+        $this->assertNotNull($bingo->cards_pdf_path);
+        $this->assertTrue(Storage::disk('local')->exists($bingo->cards_pdf_path));
+
+        Storage::disk('local')->delete($bingo->cards_pdf_path);
     }
 
     public function test_card_generation_uses_next_available_number_after_existing_gap(): void

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\GenerateBingoCardsPdf;
 use App\Models\Bingo;
 use App\Models\Card;
 use App\Models\Responsible;
@@ -77,7 +76,6 @@ class CardController extends Controller
             $cards = $this->cardGenerator->generate($bingo, $validated['quantity']);
             $bingo->update(['card_quantity' => $bingo->cards()->count()]);
             $this->pdfService->markPending($bingo);
-            GenerateBingoCardsPdf::dispatch($bingo->id)->afterResponse();
         } finally {
             $lock->release();
         }
@@ -98,7 +96,6 @@ class CardController extends Controller
         ]);
 
         $this->pdfService->markPending($card->bingo);
-        GenerateBingoCardsPdf::dispatch($card->bingo_id)->afterResponse();
 
         return back()->with('sucesso', 'Cartela atribuída com sucesso! O PDF será atualizado em segundo plano.');
     }

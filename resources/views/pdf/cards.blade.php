@@ -36,7 +36,7 @@
         .card-container {
             float: left;
             margin: 1%;
-            border: 2px solid #4c1d95;
+            border: 1px solid #111827;
             border-radius: 8px;
             overflow: hidden;
             page-break-inside: avoid;
@@ -48,27 +48,54 @@
         .copy-count-6 { width: 31.333%; }
         .copy-count-4 { width: 48%; }
         .card-header {
-            background: #4c1d95;
-            color: #fff;
-            padding: 8px 12px;
-            text-align: center;
+            background: #fff;
+            color: #111827;
+            padding: 5px 8px 0;
+            border-bottom: 1px solid #111827;
         }
-        .card-header .title { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        .card-header .number { font-size: 18px; font-weight: bold; }
+        .card-meta {
+            font-size: 9px;
+            font-weight: bold;
+            line-height: 1.1;
+            overflow: hidden;
+        }
+        .card-meta .left { float: left; width: 32%; text-align: left; }
+        .card-meta .right { float: right; width: 64%; text-align: center; text-transform: uppercase; }
+        .card-header .bingo-title {
+            clear: both;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 30px;
+            line-height: 1;
+            letter-spacing: 8px;
+            text-align: center;
+            padding: 2px 0 3px 8px;
+            border-top: 1px solid #111827;
+        }
         .card-grid {
             width: 100%;
             border-collapse: separate;
-            border-spacing: 2px;
-            padding: 8px;
+            border-spacing: 0;
+            padding: 0;
         }
         .cell {
-            border: 1px solid #e2e8f0;
-            border-radius: 4px;
-            font-size: 14px;
+            border-right: 1px solid #cbd5e1;
+            border-bottom: 1px solid #cbd5e1;
+            font-size: 22px;
             font-weight: bold;
             text-align: center;
             vertical-align: middle;
-            height: 32px;
+            height: 40px;
+            width: 20%;
+        }
+        .cell:nth-child(5) { border-right: 0; }
+        .card-grid tr:last-child .cell { border-bottom: 0; }
+        .center-logo {
+            max-width: 70%;
+            max-height: 31px;
+            width: auto;
+            height: auto;
+            display: block;
+            margin: 0 auto;
         }
         .card-footer {
             padding: 5px 12px;
@@ -83,6 +110,9 @@
 <body>
     @php
         $copiesPerPage = max(1, min((int) ($bingo->cards_per_page ?? 1), 6));
+        $cardLogoPath = $bingo->card_logo_path ? storage_path('app/public/' . $bingo->card_logo_path) : null;
+        $hasCardLogo = $cardLogoPath && file_exists($cardLogoPath);
+        $cardTitle = trim($bingo->card_title ?: 'BINGO');
     @endphp
 
     @foreach($bingo->cards as $card)
@@ -101,14 +131,23 @@
                 @for($copy = 1; $copy <= $copiesPerPage; $copy++)
                     <div class="card-container copy-count-{{ $copiesPerPage }}">
                         <div class="card-header">
-                            <div class="title">{{ $bingo->name }}</div>
-                            <div class="number">CARTELA {{ $card->card_number }}</div>
+                            <div class="card-meta">
+                                <span class="left">N° {{ $card->card_number }}</span>
+                                <span class="right">{{ $bingo->name }}</span>
+                            </div>
+                            <div class="bingo-title">{{ $cardTitle }}</div>
                         </div>
                         <table class="card-grid">
                             @foreach($card->grid as $row => $cols)
                                 <tr>
                                     @foreach($cols as $col => $number)
-                                        <td class="cell">{{ str_pad($number, 2, '0', STR_PAD_LEFT) }}</td>
+                                        <td class="cell">
+                                            @if($hasCardLogo && (int) $row === 2 && (int) $col === 2)
+                                                <img src="{{ $cardLogoPath }}" class="center-logo" alt="Logo">
+                                            @else
+                                                {{ str_pad($number, 2, '0', STR_PAD_LEFT) }}
+                                            @endif
+                                        </td>
                                     @endforeach
                                 </tr>
                             @endforeach

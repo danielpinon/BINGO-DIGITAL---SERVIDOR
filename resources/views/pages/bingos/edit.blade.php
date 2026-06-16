@@ -19,7 +19,7 @@
                         <h4 class="card-title">Informações do Bingo</h4>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('bingos.update', $bingo) }}" method="POST">
+                        <form action="{{ route('bingos.update', $bingo) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
                             <div class="row">
@@ -127,6 +127,43 @@
                                         @error('number_range_end')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Título da Cartela</label>
+                                        <input type="text" name="card_title" class="form-control @error('card_title') is-invalid @enderror" value="{{ old('card_title', $bingo->card_title ?? 'BINGO') }}" maxlength="30">
+                                        @error('card_title')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Logo no Centro da Cartela</label>
+                                        <input type="file" name="card_logo" class="form-control @error('card_logo') is-invalid @enderror" accept="image/png,image/jpeg">
+                                        @error('card_logo')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                        <small class="text-muted">PNG ou JPG até 2MB.</small>
+
+                                        @if($bingo->card_logo_path)
+                                            <div class="mt-2">
+                                                <img src="{{ asset('storage/' . $bingo->card_logo_path) }}" alt="Logo atual" style="max-height: 70px; max-width: 140px;">
+                                                <div class="form-check mt-2">
+                                                    <label class="form-check-label">
+                                                        <input class="form-check-input" type="checkbox" name="remove_card_logo" value="1">
+                                                        Remover logo atual
+                                                        <span class="form-check-sign">
+                                                            <span class="check"></span>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
