@@ -84,7 +84,7 @@ class BingoRoundsTest extends TestCase
 
         $bingo->forceFill([
             'cards_pdf_path' => null,
-            'cards_pdf_status' => 'pending',
+            'cards_pdf_status' => 'processing',
             'cards_pdf_generated_at' => null,
         ])->save();
 

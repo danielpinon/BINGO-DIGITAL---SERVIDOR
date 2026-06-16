@@ -16,7 +16,7 @@ class GeneratePendingBingoCardsPdfs extends Command
         {--retry-failed : Inclui PDFs com status failed}
         {--force : Regenera mesmo se o PDF ja estiver pronto}';
 
-    protected $description = 'Gera PDFs de cartelas pendentes para execucao via cronjob.';
+    protected $description = 'Gera PDFs de cartelas pendentes ou travados em processamento para execucao via cronjob.';
 
     public function handle(BingoCardsPdfService $pdfService): int
     {
@@ -87,7 +87,7 @@ class GeneratePendingBingoCardsPdfs extends Command
             return $query;
         }
 
-        $statuses = ['pending'];
+        $statuses = ['pending', 'processing'];
 
         if ($this->option('retry-failed')) {
             $statuses[] = 'failed';
