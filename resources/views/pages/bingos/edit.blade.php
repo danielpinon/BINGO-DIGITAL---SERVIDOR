@@ -144,11 +144,18 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">Logo no Centro da Cartela</label>
-                                        <input type="file" name="card_logo" class="form-control @error('card_logo') is-invalid @enderror" accept="image/png,image/jpeg">
+                                        <div class="bingo-file-upload">
+                                            <input type="file" id="card_logo_edit" name="card_logo" class="bingo-file-input @error('card_logo') is-invalid @enderror" accept="image/png,image/jpeg">
+                                            <label for="card_logo_edit" class="bingo-file-button">
+                                                <i class="material-icons">upload_file</i>
+                                                Escolher Logo
+                                            </label>
+                                            <span class="bingo-file-name" data-file-name-for="card_logo_edit">Nenhum arquivo selecionado</span>
+                                        </div>
                                         @error('card_logo')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror
-                                        <small class="text-muted">PNG ou JPG até 2MB.</small>
+                                        <small class="text-muted bingo-file-hint">PNG ou JPG até 2MB.</small>
 
                                         @if($bingo->card_logo_path)
                                             <div class="mt-2">

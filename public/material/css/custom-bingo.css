@@ -18,6 +18,53 @@
     --bingo-border: #e2e8f0;
 }
 
+/* ===== FILE UPLOAD ===== */
+.bingo-file-upload {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.bingo-file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+.bingo-file-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--bingo-accent) 0%, var(--bingo-secondary) 100%);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 6px 18px rgba(76, 29, 149, 0.22);
+    cursor: pointer;
+}
+
+.bingo-file-button:hover {
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(76, 29, 149, 0.3);
+}
+
+.bingo-file-name {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.bingo-file-hint {
+    display: block;
+    margin-top: 6px;
+}
+
 /* ===== SIDEBAR ===== */
 .sidebar {
     background: linear-gradient(180deg, var(--bingo-primary) 0%, var(--bingo-primary-dark) 100%) !important;
