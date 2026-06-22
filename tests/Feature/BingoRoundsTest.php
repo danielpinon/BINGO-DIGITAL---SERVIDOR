@@ -9,7 +9,9 @@ use App\Models\BingoRound;
 use App\Models\Card;
 use App\Models\CardNumber;
 use App\Models\DrawnNumber;
+use App\Models\Responsible;
 use App\Models\User;
+use App\Services\WinnerDetectionService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -276,6 +278,55 @@ class BingoRoundsTest extends TestCase
             ->assertJsonPath('last_drawn.number', 21);
     }
 
+    public function test_only_linked_cards_option_ignores_unassigned_cards_for_winners(): void
+    {
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 1);
+        $pattern = $bingo->prizePatterns()->first();
+        $round = $bingo->rounds()->first();
+
+        $bingo->update([
+            'status' => 'ongoing',
+            'current_prize_pattern_id' => $pattern->id,
+            'only_linked_cards' => true,
+        ]);
+
+        $round->update([
+            'status' => 'ongoing',
+            'current_prize_pattern_id' => $pattern->id,
+            'started_at' => now(),
+        ]);
+
+        $unassignedCard = $this->createWinningLineCard($bingo, '001');
+        $linkedCard = $this->createWinningLineCard($bingo, '002');
+        $responsible = Responsible::create([
+            'name' => 'Responsavel Teste',
+            'status' => 'active',
+        ]);
+        $linkedCard->update([
+            'responsible_id' => $responsible->id,
+            'status' => 'distributed',
+        ]);
+
+        $drawnNumbers = [1, 2, 3, 4, 5];
+        foreach ($drawnNumbers as $number) {
+            DrawnNumber::create([
+                'bingo_id' => $bingo->id,
+                'bingo_round_id' => $round->id,
+                'number' => $number,
+                'drawn_at' => now(),
+            ]);
+        }
+
+        $detector = new WinnerDetectionService();
+        $possibleWinners = $detector->getPossibleWinners($bingo->refresh(), $drawnNumbers, $round);
+
+        $this->assertCount(1, $possibleWinners);
+        $this->assertSame($linkedCard->id, $possibleWinners[0]['card']->id);
+        $this->assertFalse($detector->verifyWinner($bingo->refresh(), $unassignedCard->id, $drawnNumbers, $round));
+        $this->assertTrue($detector->verifyWinner($bingo->refresh(), $linkedCard->id, $drawnNumbers, $round));
+    }
+
     private function createBingoWithRounds(User $user, int $roundQuantity): Bingo
     {
         $bingo = Bingo::create([
@@ -289,6 +340,7 @@ class BingoRoundsTest extends TestCase
             'numbers_per_card' => 25,
             'round_quantity' => $roundQuantity,
             'status' => 'preparation',
+            'only_linked_cards' => false,
             'created_by' => $user->id,
         ]);
 
@@ -310,12 +362,12 @@ class BingoRoundsTest extends TestCase
         return $bingo;
     }
 
-    private function createWinningLineCard(Bingo $bingo): Card
+    private function createWinningLineCard(Bingo $bingo, string $cardNumber = '001'): Card
     {
         $card = Card::create([
             'bingo_id' => $bingo->id,
             'responsible_id' => null,
-            'card_number' => '001',
+            'card_number' => $cardNumber,
             'status' => 'available',
         ]);
 

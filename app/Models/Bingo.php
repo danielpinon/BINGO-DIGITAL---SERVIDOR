@@ -13,7 +13,7 @@ class Bingo extends Model
         'name', 'description', 'event_date', 'event_time',
         'number_range_start', 'number_range_end',
         'card_quantity', 'numbers_per_card', 'round_quantity', 'cards_per_page',
-        'card_title', 'card_logo_path',
+        'card_title', 'card_logo_path', 'only_linked_cards',
         'cards_pdf_path', 'cards_pdf_status', 'cards_pdf_generated_at',
         'status', 'current_prize_pattern_id', 'created_by'
     ];
@@ -21,6 +21,7 @@ class Bingo extends Model
     protected $casts = [
         'event_date' => 'date',
         'event_time' => 'datetime:H:i',
+        'only_linked_cards' => 'boolean',
         'cards_pdf_generated_at' => 'datetime',
     ];
 

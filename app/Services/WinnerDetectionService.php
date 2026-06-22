@@ -16,7 +16,10 @@ class WinnerDetectionService
             return [];
         }
 
-        $cards = Card::with('numbers')->where('bingo_id', $bingo->id)->get();
+        $cards = Card::with('numbers')
+            ->where('bingo_id', $bingo->id)
+            ->when($bingo->only_linked_cards, fn ($query) => $query->whereNotNull('responsible_id'))
+            ->get();
         $possibleWinners = [];
         $drawnSet = array_flip($drawnNumbers);
 
@@ -64,7 +67,11 @@ class WinnerDetectionService
             return false;
         }
 
-        $card = Card::with('numbers')->find($cardId);
+        $card = Card::with('numbers')
+            ->where('id', $cardId)
+            ->where('bingo_id', $bingo->id)
+            ->when($bingo->only_linked_cards, fn ($query) => $query->whereNotNull('responsible_id'))
+            ->first();
         if (!$card) {
             return false;
         }

@@ -62,6 +62,7 @@ class BingoController extends Controller
             'cards_per_page' => 'required|integer|min:1|max:6',
             'card_title' => 'nullable|string|max:30',
             'card_logo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
+            'only_linked_cards' => 'nullable|boolean',
             'prize_patterns' => 'required|array|min:1',
             'prize_patterns.*' => 'required|string|in:line,quina,full_card,cross,corners',
         ]);
@@ -84,6 +85,7 @@ class BingoController extends Controller
             'cards_per_page' => $validated['cards_per_page'],
             'card_title' => $cardTitle ?: 'BINGO',
             'card_logo_path' => $cardLogoPath,
+            'only_linked_cards' => $request->boolean('only_linked_cards'),
             'status' => 'preparation',
             'created_by' => Auth::id(),
         ]);
@@ -150,6 +152,7 @@ class BingoController extends Controller
             'card_title' => 'nullable|string|max:30',
             'card_logo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
             'remove_card_logo' => 'nullable|boolean',
+            'only_linked_cards' => 'nullable|boolean',
         ]);
 
         $cardTitle = $validated['card_title'] ?? 'BINGO';
@@ -164,6 +167,7 @@ class BingoController extends Controller
         $updateData = $validated;
         unset($updateData['card_logo'], $updateData['remove_card_logo']);
         $updateData['card_title'] = $cardTitle ?: 'BINGO';
+        $updateData['only_linked_cards'] = $request->boolean('only_linked_cards');
 
         if ($request->boolean('remove_card_logo') && $bingo->card_logo_path) {
             Storage::disk('public')->delete($bingo->card_logo_path);

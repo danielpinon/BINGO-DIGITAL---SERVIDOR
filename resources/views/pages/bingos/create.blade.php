@@ -36,6 +36,23 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input class="form-check-input" type="checkbox" name="only_linked_cards" value="1" {{ old('only_linked_cards') ? 'checked' : '' }}>
+                                                Sortear somente cartelas vinculadas
+                                                <span class="form-check-sign">
+                                                    <span class="check"></span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <small class="text-muted">Quando ativado, cartelas sem responsável não entram em possíveis ganhadores nem podem ser validadas.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
                                         <label class="form-label">Descrição</label>
                                         <textarea name="description" class="form-control @error('description') is-invalid @enderror" rows="3" placeholder="Descrição do evento...">{{ old('description') }}</textarea>
                                         @error('description')
