@@ -25,14 +25,14 @@
         }
         .card-number {
             position: absolute;
-            left: 147mm;
-            top: 22mm;
-            width: 44mm;
-            height: 10mm;
+            left: 145mm;
+            top: 16mm;
+            width: 49mm;
+            height: 17mm;
             z-index: 1;
-            font-size: 12pt;
-            font-weight: 700;
-            line-height: 10mm;
+            font-size: 18pt;
+            font-weight: 800;
+            line-height: 17mm;
             text-align: center;
         }
         .num {
@@ -74,7 +74,7 @@
         @php $grid = $card->grid; @endphp
         <div class="ticket">
             <img src="{{ $templatePath }}" class="template-bg" alt="">
-            <div class="card-number">N° {{ $card->card_number }}</div>
+            <div class="card-number">{{ $card->card_number }}</div>
 
             @foreach($grid as $row => $cols)
                 @foreach($cols as $col => $number)
