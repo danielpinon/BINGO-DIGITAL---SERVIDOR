@@ -75,7 +75,12 @@ class CardController extends Controller
 
         try {
             $cards = $this->cardGenerator->generate($bingo, $validated['quantity']);
-            $bingo->update(['card_quantity' => $bingo->cards()->count()]);
+            $bingo->update([
+                'card_quantity' => $bingo->cards()->count(),
+                'card_generation_status' => 'ready',
+                'card_generation_message' => 'Cartelas geradas.',
+                'card_generation_completed_at' => now(),
+            ]);
             $this->pdfService->markPending($bingo);
         } finally {
             $lock->release();

@@ -12,7 +12,9 @@ class Bingo extends Model
     protected $fillable = [
         'name', 'description', 'event_date', 'event_time',
         'number_range_start', 'number_range_end',
-        'card_quantity', 'numbers_per_card', 'round_quantity', 'cards_per_page',
+        'card_quantity', 'card_generation_status', 'card_generation_message',
+        'card_generation_started_at', 'card_generation_completed_at',
+        'numbers_per_card', 'round_quantity', 'cards_per_page',
         'card_title', 'card_logo_path', 'card_template_path', 'only_linked_cards',
         'cards_pdf_path', 'cards_pdf_status', 'cards_pdf_generated_at',
         'status', 'current_prize_pattern_id', 'created_by'
@@ -22,6 +24,8 @@ class Bingo extends Model
         'event_date' => 'date',
         'event_time' => 'datetime:H:i',
         'only_linked_cards' => 'boolean',
+        'card_generation_started_at' => 'datetime',
+        'card_generation_completed_at' => 'datetime',
         'cards_pdf_generated_at' => 'datetime',
     ];
 
@@ -94,6 +98,17 @@ class Bingo extends Model
             'processing' => '<span class="badge badge-info">Preparando PDF</span>',
             'failed' => '<span class="badge badge-danger">PDF com Erro</span>',
             default => '<span class="badge badge-secondary">Gerar PDF</span>',
+        };
+    }
+
+    public function getCardGenerationBadgeAttribute()
+    {
+        return match($this->card_generation_status) {
+            'ready' => '<span class="badge badge-success">Cartelas Geradas</span>',
+            'processing' => '<span class="badge badge-info">Gerando Cartelas</span>',
+            'failed' => '<span class="badge badge-danger">Cartelas com Erro</span>',
+            'pending' => '<span class="badge badge-warning">Cartelas Pendentes</span>',
+            default => '',
         };
     }
 }

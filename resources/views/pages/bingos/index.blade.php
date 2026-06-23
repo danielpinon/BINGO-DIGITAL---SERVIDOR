@@ -113,8 +113,14 @@
                                         <br><small class="text-muted">{{ $bingo->event_time->format('H:i') }}</small>
                                     </td>
                                     <td>
-                                        {{ $bingo->cards_count }}
+                                        {{ $bingo->cards_count }} / {{ $bingo->card_quantity }}
+                                        @if($bingo->card_generation_badge)
+                                            <br><small>{!! $bingo->card_generation_badge !!}</small>
+                                        @endif
                                         <br><small>{!! $bingo->cards_pdf_badge !!}</small>
+                                        @if($bingo->card_generation_message && $bingo->card_generation_status !== 'ready')
+                                            <br><small class="text-muted">{{ $bingo->card_generation_message }}</small>
+                                        @endif
                                     </td>
                                     <td>{!! $bingo->status_badge !!}</td>
                                     <td>

@@ -56,7 +56,7 @@ class BingoController extends Controller
             'event_time' => 'required',
             'number_range_start' => 'required|integer|min:1',
             'number_range_end' => 'required|integer|gt:number_range_start',
-            'card_quantity' => 'required|integer|min:1',
+            'card_quantity' => 'required|integer|min:1|max:10000',
             'numbers_per_card' => 'required|integer|min:1',
             'round_quantity' => 'required|integer|min:1|max:5',
             'cards_per_page' => 'required|integer|min:1|max:6',
@@ -84,6 +84,10 @@ class BingoController extends Controller
             'number_range_start' => $validated['number_range_start'],
             'number_range_end' => $validated['number_range_end'],
             'card_quantity' => $validated['card_quantity'],
+            'card_generation_status' => 'pending',
+            'card_generation_message' => 'Aguardando geração pelo cron.',
+            'card_generation_started_at' => null,
+            'card_generation_completed_at' => null,
             'numbers_per_card' => $validated['numbers_per_card'],
             'round_quantity' => $validated['round_quantity'],
             'cards_per_page' => $validated['cards_per_page'],
@@ -113,13 +117,10 @@ class BingoController extends Controller
         }
 
         $this->syncRounds($bingo, (int) $validated['round_quantity']);
-        $generatedCards = $this->cardGenerator->generate($bingo, (int) $validated['card_quantity']);
-        $bingo->update(['card_quantity' => $bingo->cards()->count()]);
-        $this->pdfService->markPending($bingo);
 
         return redirect()
             ->route('bingos.index')
-            ->with('sucesso', 'Bingo criado com sucesso! ' . $generatedCards . ' cartelas geradas. O PDF será preparado em segundo plano.');
+            ->with('sucesso', 'Bingo criado com sucesso! As cartelas serão geradas em segundo plano pelo cron.');
     }
 
     public function show(Bingo $bingo)
@@ -150,7 +151,7 @@ class BingoController extends Controller
             'event_time' => 'required',
             'number_range_start' => 'required|integer|min:1',
             'number_range_end' => 'required|integer|gt:number_range_start',
-            'card_quantity' => 'required|integer|min:1',
+            'card_quantity' => 'required|integer|min:1|max:10000',
             'numbers_per_card' => 'required|integer|min:1',
             'round_quantity' => 'required|integer|min:1|max:5',
             'cards_per_page' => 'required|integer|min:1|max:6',
@@ -208,6 +209,14 @@ class BingoController extends Controller
 
         if ($bingo->status === 'preparation') {
             $this->syncRounds($bingo, (int) $validated['round_quantity']);
+
+            if ((int) $validated['card_quantity'] > $bingo->cards()->count()) {
+                $bingo->forceFill([
+                    'card_generation_status' => 'pending',
+                    'card_generation_message' => 'Aguardando geração pelo cron.',
+                    'card_generation_completed_at' => null,
+                ])->save();
+            }
         }
 
         if ($pdfShouldRegenerate && $bingo->cards()->exists()) {
@@ -235,6 +244,10 @@ class BingoController extends Controller
     {
         if ($bingo->status !== 'preparation') {
             return back()->with('falha', 'O bingo já foi iniciado ou finalizado.');
+        }
+
+        if ($bingo->cards()->count() < (int) $bingo->card_quantity) {
+            return back()->with('falha', 'Aguarde a geração de todas as cartelas antes de iniciar o bingo.');
         }
 
         $firstPattern = $bingo->prizePatterns()->orderBy('pattern_order')->first();

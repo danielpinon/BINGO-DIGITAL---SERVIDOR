@@ -22,7 +22,7 @@ class BingoRoundsTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_bingo_can_be_created_with_up_to_five_rounds_and_generates_cards(): void
+    public function test_bingo_can_be_created_with_up_to_five_rounds_and_queues_cards_generation(): void
     {
         $user = User::factory()->create();
 
@@ -47,7 +47,9 @@ class BingoRoundsTest extends TestCase
             $this->assertSame($roundQuantity, (int) $bingo->round_quantity);
             $this->assertSame(2, (int) $bingo->cards_per_page);
             $this->assertSame($roundQuantity, $bingo->rounds()->count());
-            $this->assertSame(10, $bingo->cards()->count());
+            $this->assertSame(10, (int) $bingo->card_quantity);
+            $this->assertSame(0, $bingo->cards()->count());
+            $this->assertSame('pending', $bingo->card_generation_status);
         }
     }
 
@@ -197,6 +199,31 @@ class BingoRoundsTest extends TestCase
         $this->assertTrue(Storage::disk('local')->exists($bingo->cards_pdf_path));
 
         Storage::disk('local')->delete($bingo->cards_pdf_path);
+    }
+
+    public function test_cron_command_generates_pending_cards_before_pdf(): void
+    {
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 1);
+
+        $bingo->forceFill([
+            'card_quantity' => 3,
+            'card_generation_status' => 'pending',
+            'card_generation_message' => 'Aguardando geração pelo cron.',
+            'cards_pdf_path' => null,
+            'cards_pdf_status' => 'pending',
+            'cards_pdf_generated_at' => null,
+        ])->save();
+
+        $this->artisan('bingos:generate-card-pdfs --limit=1 --bingo=' . $bingo->id)
+            ->expectsOutputToContain('gerando 3 cartelas')
+            ->assertExitCode(0);
+
+        $bingo->refresh();
+        $this->assertSame(3, $bingo->cards()->count());
+        $this->assertSame('ready', $bingo->card_generation_status);
+        $this->assertSame('pending', $bingo->cards_pdf_status);
+        $this->assertNull($bingo->cards_pdf_path);
     }
 
     public function test_pdf_generation_start_redirects_to_progress_page(): void
