@@ -80,7 +80,7 @@
                 <div class="card h-100">
                     <div class="card-header" style="background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 100%); color: #fff; padding: 10px 15px;">
                         <div class="d-flex justify-content-between align-items-center">
-                            <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">{{ $card->bingo->name }}</span>
+                            <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">{{ $card->bingo?->name ?? 'Bingo removido' }}</span>
                             <span style="font-size: 1.2rem; font-weight: 700;">{{ $card->card_number }}</span>
                         </div>
                     </div>

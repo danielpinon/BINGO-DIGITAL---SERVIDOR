@@ -26,7 +26,8 @@ class CardController extends Controller
 
     public function index(Request $request)
     {
-        $query = Card::with(['bingo', 'responsible', 'numbers']);
+        $query = Card::with(['bingo', 'responsible', 'numbers'])
+            ->whereHas('bingo');
         
         if ($request->filled('bingo_id')) {
             $query->where('bingo_id', $request->bingo_id);

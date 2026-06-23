@@ -327,6 +327,20 @@ class BingoRoundsTest extends TestCase
         $this->assertTrue($detector->verifyWinner($bingo->refresh(), $linkedCard->id, $drawnNumbers, $round));
     }
 
+    public function test_cards_index_ignores_cards_from_deleted_bingos(): void
+    {
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 1);
+        $card = $this->createWinningLineCard($bingo, '999');
+
+        $bingo->delete();
+
+        $response = $this->actingAs($user)->get(route('cards.index'));
+
+        $response->assertOk();
+        $response->assertDontSee($card->card_number);
+    }
+
     private function createBingoWithRounds(User $user, int $roundQuantity): Bingo
     {
         $bingo = Bingo::create([
