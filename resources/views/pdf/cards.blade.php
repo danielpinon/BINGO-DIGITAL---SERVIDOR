@@ -35,6 +35,18 @@
             line-height: 17mm;
             text-align: center;
         }
+        .card-number-bottom {
+            position: absolute;
+            left: 146mm;
+            top: 258.5mm;
+            width: 47mm;
+            height: 11.5mm;
+            z-index: 1;
+            font-size: 16pt;
+            font-weight: 800;
+            line-height: 11.5mm;
+            text-align: center;
+        }
         .num {
             position: absolute;
             z-index: 1;
@@ -75,6 +87,7 @@
         <div class="ticket">
             <img src="{{ $templatePath }}" class="template-bg" alt="">
             <div class="card-number">{{ $card->card_number }}</div>
+            <div class="card-number-bottom">{{ $card->card_number }}</div>
 
             @foreach($grid as $row => $cols)
                 @foreach($cols as $col => $number)
