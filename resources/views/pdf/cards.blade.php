@@ -26,7 +26,7 @@
         .card-number {
             position: absolute;
             left: 145mm;
-            top: 16mm;
+            top: 14.7mm;
             width: 49mm;
             height: 17mm;
             z-index: 1;
