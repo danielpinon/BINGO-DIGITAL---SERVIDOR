@@ -76,11 +76,11 @@
         $templatePath = $bingo->card_template_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($bingo->card_template_path)
             ? \Illuminate\Support\Facades\Storage::disk('public')->path($bingo->card_template_path)
             : public_path('material/img/bingo-ticket-template.jpeg');
-        $mainX = [34.0, 49.0, 63.8, 78.7, 93.6];
+        $mainX = [37.7, 51.8, 66.0, 80.2, 94.4];
         $mainY = [94.2, 107.2, 120.2, 133.2, 146.2];
-        $leftX = [19.7, 30.0, 40.4, 50.7, 61.1];
+        $leftX = [22.7, 33.0, 43.4, 53.7, 64.1];
         $leftY = [193.2, 202.4, 211.4, 220.5, 229.6];
-        $rightX = [114.1, 124.7, 135.3, 145.9, 156.4];
+        $rightX = [110.5, 120.9, 131.3, 141.7, 152.1];
         $rightY = [168.8, 177.9, 187.0, 196.1, 205.2];
     @endphp
 
