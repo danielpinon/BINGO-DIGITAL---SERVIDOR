@@ -73,7 +73,9 @@
 </head>
 <body>
     @php
-        $templatePath = public_path('material/img/bingo-ticket-template.jpeg');
+        $templatePath = $bingo->card_template_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($bingo->card_template_path)
+            ? \Illuminate\Support\Facades\Storage::disk('public')->path($bingo->card_template_path)
+            : public_path('material/img/bingo-ticket-template.jpeg');
         $mainX = [34.0, 49.0, 63.8, 78.7, 93.6];
         $mainY = [94.2, 107.2, 120.2, 133.2, 146.2];
         $leftX = [19.7, 30.0, 40.4, 50.7, 61.1];

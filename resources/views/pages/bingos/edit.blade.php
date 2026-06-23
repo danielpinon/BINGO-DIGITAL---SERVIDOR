@@ -178,6 +178,41 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
+                                        <label class="form-label">Imagem Template da Cartela</label>
+                                        <div class="bingo-file-upload">
+                                            <input type="file" id="card_template_edit" name="card_template" class="bingo-file-input @error('card_template') is-invalid @enderror" accept="image/png,image/jpeg">
+                                            <label for="card_template_edit" class="bingo-file-button">
+                                                <i class="material-icons">image</i>
+                                                Escolher Template
+                                            </label>
+                                            <span class="bingo-file-name" data-file-name-for="card_template_edit">Nenhum arquivo selecionado</span>
+                                        </div>
+                                        @error('card_template')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                        <small class="text-muted bingo-file-hint">PNG ou JPG até 5MB. Essa imagem será usada como fundo das cartelas no PDF.</small>
+
+                                        @if($bingo->card_template_path)
+                                            <div class="mt-2">
+                                                <img src="{{ asset('storage/' . $bingo->card_template_path) }}" alt="Template atual" style="max-height: 160px; max-width: 120px;">
+                                                <div class="form-check mt-2">
+                                                    <label class="form-check-label">
+                                                        <input class="form-check-input" type="checkbox" name="remove_card_template" value="1">
+                                                        Remover template atual
+                                                        <span class="form-check-sign">
+                                                            <span class="check"></span>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
                                         <div class="form-check">
                                             <label class="form-check-label">
                                                 <input class="form-check-input" type="checkbox" name="only_linked_cards" value="1" {{ old('only_linked_cards', $bingo->only_linked_cards) ? 'checked' : '' }}>

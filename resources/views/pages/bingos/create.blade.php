@@ -179,6 +179,26 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
+                                        <label class="form-label">Imagem Template da Cartela</label>
+                                        <div class="bingo-file-upload">
+                                            <input type="file" id="card_template_create" name="card_template" class="bingo-file-input @error('card_template') is-invalid @enderror" accept="image/png,image/jpeg">
+                                            <label for="card_template_create" class="bingo-file-button">
+                                                <i class="material-icons">image</i>
+                                                Escolher Template
+                                            </label>
+                                            <span class="bingo-file-name" data-file-name-for="card_template_create">Nenhum arquivo selecionado</span>
+                                        </div>
+                                        @error('card_template')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                        <small class="text-muted bingo-file-hint">PNG ou JPG até 5MB. Essa imagem será usada como fundo das cartelas no PDF.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
                                         <label class="form-label">Padrões de Premiação *</label>
                                         <div class="row">
                                             @foreach($patterns as $key => $label)

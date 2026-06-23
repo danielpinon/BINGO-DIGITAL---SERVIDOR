@@ -13,6 +13,7 @@ use App\Models\Responsible;
 use App\Models\User;
 use App\Services\WinnerDetectionService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -48,6 +49,102 @@ class BingoRoundsTest extends TestCase
             $this->assertSame($roundQuantity, $bingo->rounds()->count());
             $this->assertSame(10, $bingo->cards()->count());
         }
+    }
+
+    public function test_bingo_can_store_custom_card_template_image(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post(route('bingos.store'), [
+            'name' => 'Bingo Template',
+            'description' => null,
+            'event_date' => now()->format('Y-m-d'),
+            'event_time' => '19:00',
+            'number_range_start' => 1,
+            'number_range_end' => 75,
+            'card_quantity' => 1,
+            'numbers_per_card' => 25,
+            'round_quantity' => 1,
+            'cards_per_page' => 1,
+            'card_template' => UploadedFile::fake()->image('template.jpg', 853, 1280),
+            'prize_patterns' => ['line'],
+        ]);
+
+        $response->assertRedirect(route('bingos.index'));
+
+        $bingo = Bingo::where('name', 'Bingo Template')->firstOrFail();
+
+        $this->assertNotNull($bingo->card_template_path);
+        Storage::disk('public')->assertExists($bingo->card_template_path);
+        $this->assertStringStartsWith('bingo-card-templates/', $bingo->card_template_path);
+    }
+
+    public function test_bingo_update_can_replace_and_remove_custom_card_template(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 1);
+        $this->createWinningLineCard($bingo, '777');
+        $bingo->update(['card_quantity' => $bingo->cards()->count()]);
+
+        $oldTemplatePath = UploadedFile::fake()
+            ->image('old-template.jpg', 853, 1280)
+            ->store('bingo-card-templates', 'public');
+
+        $bingo->forceFill([
+            'card_template_path' => $oldTemplatePath,
+            'cards_pdf_status' => 'ready',
+            'cards_pdf_path' => 'old.pdf',
+            'cards_pdf_generated_at' => now(),
+        ])->save();
+
+        $replaceResponse = $this->actingAs($user)->put(route('bingos.update', $bingo), [
+            'name' => $bingo->name,
+            'description' => $bingo->description,
+            'event_date' => $bingo->event_date->format('Y-m-d'),
+            'event_time' => '19:00',
+            'number_range_start' => $bingo->number_range_start,
+            'number_range_end' => $bingo->number_range_end,
+            'card_quantity' => $bingo->cards()->count(),
+            'numbers_per_card' => $bingo->numbers_per_card,
+            'round_quantity' => $bingo->round_quantity,
+            'cards_per_page' => $bingo->cards_per_page ?? 1,
+            'card_title' => $bingo->card_title,
+            'card_template' => UploadedFile::fake()->image('new-template.jpg', 853, 1280),
+        ]);
+
+        $replaceResponse->assertRedirect(route('bingos.index'));
+
+        $bingo->refresh();
+        $this->assertNotSame($oldTemplatePath, $bingo->card_template_path);
+        Storage::disk('public')->assertMissing($oldTemplatePath);
+        Storage::disk('public')->assertExists($bingo->card_template_path);
+        $this->assertSame('pending', $bingo->cards_pdf_status);
+
+        $newTemplatePath = $bingo->card_template_path;
+
+        $removeResponse = $this->actingAs($user)->put(route('bingos.update', $bingo), [
+            'name' => $bingo->name,
+            'description' => $bingo->description,
+            'event_date' => $bingo->event_date->format('Y-m-d'),
+            'event_time' => '19:00',
+            'number_range_start' => $bingo->number_range_start,
+            'number_range_end' => $bingo->number_range_end,
+            'card_quantity' => $bingo->cards()->count(),
+            'numbers_per_card' => $bingo->numbers_per_card,
+            'round_quantity' => $bingo->round_quantity,
+            'cards_per_page' => $bingo->cards_per_page ?? 1,
+            'card_title' => $bingo->card_title,
+            'remove_card_template' => '1',
+        ]);
+
+        $removeResponse->assertRedirect(route('bingos.index'));
+
+        $this->assertNull($bingo->refresh()->card_template_path);
+        Storage::disk('public')->assertMissing($newTemplatePath);
     }
 
     public function test_card_generation_prepares_pdf_and_keeps_one_card_set_for_all_rounds(): void
@@ -395,6 +492,7 @@ class BingoRoundsTest extends TestCase
             'card_quantity' => 0,
             'numbers_per_card' => 25,
             'round_quantity' => $roundQuantity,
+            'cards_per_page' => 1,
             'status' => 'preparation',
             'only_linked_cards' => false,
             'created_by' => $user->id,
