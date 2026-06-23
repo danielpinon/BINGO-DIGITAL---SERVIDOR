@@ -16,6 +16,11 @@
                             <i class="material-icons">picture_as_pdf</i> Gerar PDF
                         </button>
                     </form>
+                    @if($bingo->cards_pdf_status === 'ready' && $bingo->cards_pdf_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($bingo->cards_pdf_path))
+                        <a href="{{ route('cards.export', ['bingo_id' => $bingo->id]) }}" class="btn btn-success btn-sm">
+                            <i class="material-icons">download</i> Baixar PDF
+                        </a>
+                    @endif
                     <a href="{{ route('bingos.edit', $bingo) }}" class="btn btn-warning btn-sm">
                         <i class="material-icons">edit</i> Editar
                     </a>
