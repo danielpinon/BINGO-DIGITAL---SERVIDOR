@@ -20,7 +20,7 @@ class BingoCardsPdfService
             'cards_pdf_generated_at' => null,
         ])->save();
 
-        $this->setProgress($bingo, 5, 'Geração aguardando processamento.');
+        $this->setProgress($bingo, 5, 'Geração solicitada. Aguardando o cron processar o PDF.');
     }
 
     public function generate(Bingo $bingo, ?string $memoryLimit = null, ?int $timeout = null): string
@@ -79,7 +79,7 @@ class BingoCardsPdfService
 
         return match ($bingo->cards_pdf_status) {
             'processing' => ['percent' => 20, 'message' => 'PDF em processamento.'],
-            default => ['percent' => 5, 'message' => 'Geração aguardando processamento.'],
+            default => ['percent' => 5, 'message' => 'Geração solicitada. Aguardando o cron processar o PDF.'],
         };
     }
 

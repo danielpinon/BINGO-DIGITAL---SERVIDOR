@@ -11,7 +11,6 @@ use App\Services\CardGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\Process\PhpExecutableFinder;
 use Throwable;
 
 class CardController extends Controller
@@ -202,7 +201,6 @@ class CardController extends Controller
         }
 
         $this->pdfService->markPending($bingo);
-        $this->startPdfGenerationProcess($bingo);
 
         return redirect()->route('cards.pdf.loading', $bingo);
     }
@@ -237,25 +235,4 @@ class CardController extends Controller
         ]);
     }
 
-    private function startPdfGenerationProcess(Bingo $bingo): void
-    {
-        if (app()->runningUnitTests()) {
-            return;
-        }
-
-        $php = (new PhpExecutableFinder())->find(false) ?: PHP_BINARY;
-        $command = implode(' ', [
-            escapeshellarg($php),
-            escapeshellarg(base_path('artisan')),
-            'bingos:generate-card-pdfs',
-            '--limit=1',
-            '--force',
-            '--bingo=' . escapeshellarg((string) $bingo->id),
-            '--memory=1536M',
-            '--timeout=900',
-            '> /dev/null 2>&1 &',
-        ]);
-
-        exec($command);
-    }
 }

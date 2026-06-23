@@ -17,7 +17,7 @@
                             </div>
 
                             <h3 class="pdf-progress-title" data-pdf-title>Preparando geração</h3>
-                            <p class="pdf-progress-message" data-pdf-message>Solicitando geração do PDF no servidor.</p>
+                            <p class="pdf-progress-message" data-pdf-message>Solicitando geração do PDF. O cron irá processar em segundo plano.</p>
 
                             <div class="pdf-progress-track">
                                 <div class="pdf-progress-bar" data-pdf-bar style="width: 5%;"></div>
