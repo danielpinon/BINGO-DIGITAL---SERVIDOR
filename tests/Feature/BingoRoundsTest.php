@@ -199,6 +199,58 @@ class BingoRoundsTest extends TestCase
         Storage::disk('local')->delete($bingo->cards_pdf_path);
     }
 
+    public function test_pdf_generation_start_redirects_to_progress_page(): void
+    {
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 1);
+        $this->createWinningLineCard($bingo, '501');
+
+        $response = $this->actingAs($user)->post(route('cards.pdf.start', $bingo));
+
+        $response->assertRedirect(route('cards.pdf.loading', $bingo));
+        $this->assertSame('pending', $bingo->refresh()->cards_pdf_status);
+        $this->assertNull($bingo->cards_pdf_path);
+    }
+
+    public function test_pdf_generation_loading_page_renders_progress_ui(): void
+    {
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 1);
+
+        $response = $this->actingAs($user)->get(route('cards.pdf.loading', $bingo));
+
+        $response->assertOk();
+        $response->assertSee('Gerando PDF das Cartelas');
+        $response->assertSee(str_replace('/', '\\/', route('cards.pdf.progress', $bingo)), false);
+    }
+
+    public function test_pdf_generation_progress_endpoint_reports_status(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 1);
+
+        $bingo->forceFill([
+            'cards_pdf_status' => 'ready',
+            'cards_pdf_path' => 'bingo-card-pdfs/test.pdf',
+            'cards_pdf_generated_at' => now(),
+        ])->save();
+        Storage::disk('local')->put($bingo->cards_pdf_path, 'pdf');
+
+        $response = $this->actingAs($user)->getJson(route('cards.pdf.progress', $bingo));
+
+        $response->assertOk()
+            ->assertJson([
+                'status' => 'ready',
+                'status_label' => 'Pronto',
+                'percent' => 100,
+                'ready' => true,
+                'failed' => false,
+            ])
+            ->assertJsonPath('download_url', route('cards.export', ['bingo_id' => $bingo->id]));
+    }
+
     public function test_card_generation_uses_next_available_number_after_existing_gap(): void
     {
         $user = User::factory()->create();

@@ -49,6 +49,9 @@ Route::group([
     Route::post('cards/generate', 'CardController@generate')->name('cards.generate');
     Route::get('cards', 'CardController@index')->name('cards.index');
     Route::get('cards/export', 'CardController@export')->name('cards.export');
+    Route::post('cards/pdf/{bingo}/start', 'CardController@startPdfGeneration')->name('cards.pdf.start');
+    Route::get('cards/pdf/{bingo}/loading', 'CardController@pdfLoading')->name('cards.pdf.loading');
+    Route::get('cards/pdf/{bingo}/progress', 'CardController@pdfProgress')->name('cards.pdf.progress');
     Route::post('cards/{card}/assign', 'CardController@assign')->name('cards.assign');
 
     // Sorteio

@@ -11,6 +11,7 @@ use App\Services\CardGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\Process\PhpExecutableFinder;
 use Throwable;
 
 class CardController extends Controller
@@ -190,5 +191,71 @@ class CardController extends Controller
         } finally {
             $lock->release();
         }
+    }
+
+    public function startPdfGeneration(Request $request, Bingo $bingo)
+    {
+        if (!$bingo->cards()->exists()) {
+            return redirect()
+                ->route('bingos.index')
+                ->with('falha', 'Este bingo ainda não possui cartelas para gerar o PDF.');
+        }
+
+        $this->pdfService->markPending($bingo);
+        $this->startPdfGenerationProcess($bingo);
+
+        return redirect()->route('cards.pdf.loading', $bingo);
+    }
+
+    public function pdfLoading(Bingo $bingo)
+    {
+        return view('pages.cards.pdf-loading', compact('bingo'));
+    }
+
+    public function pdfProgress(Bingo $bingo)
+    {
+        $bingo->refresh();
+        $progress = $this->pdfService->progress($bingo);
+        $isReady = $bingo->cards_pdf_status === 'ready'
+            && $bingo->cards_pdf_path
+            && Storage::disk('local')->exists($bingo->cards_pdf_path);
+
+        return response()->json([
+            'status' => $bingo->cards_pdf_status ?? 'pending',
+            'status_label' => match ($bingo->cards_pdf_status) {
+                'ready' => 'Pronto',
+                'processing' => 'Processando',
+                'failed' => 'Falhou',
+                default => 'Aguardando',
+            },
+            'percent' => $progress['percent'],
+            'message' => $progress['message'],
+            'updated_at' => $progress['updated_at'] ?? null,
+            'ready' => $isReady,
+            'failed' => $bingo->cards_pdf_status === 'failed',
+            'download_url' => $isReady ? route('cards.export', ['bingo_id' => $bingo->id]) : null,
+        ]);
+    }
+
+    private function startPdfGenerationProcess(Bingo $bingo): void
+    {
+        if (app()->runningUnitTests()) {
+            return;
+        }
+
+        $php = (new PhpExecutableFinder())->find(false) ?: PHP_BINARY;
+        $command = implode(' ', [
+            escapeshellarg($php),
+            escapeshellarg(base_path('artisan')),
+            'bingos:generate-card-pdfs',
+            '--limit=1',
+            '--force',
+            '--bingo=' . escapeshellarg((string) $bingo->id),
+            '--memory=1536M',
+            '--timeout=900',
+            '> /dev/null 2>&1 &',
+        ]);
+
+        exec($command);
     }
 }
