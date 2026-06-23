@@ -38,7 +38,7 @@
         .card-number-bottom {
             position: absolute;
             left: 145mm;
-            top: 251.5mm;
+            top: 247.5mm;
             width: 47mm;
             height: 11.5mm;
             z-index: 1;
