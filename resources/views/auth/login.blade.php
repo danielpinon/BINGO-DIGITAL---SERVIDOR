@@ -567,7 +567,7 @@
 
                 <div class="bingo-input-group {{ $errors->has('email') ? 'has-error' : '' }}">
                     <input type="email" name="email" id="email" placeholder="Email"
-                           value="{{ old('email', 'admin@material.com') }}" required autocomplete="off">
+                           value="{{ old('email') }}" required autocomplete="off">
                     <span class="input-icon material-icons">mail</span>
                     @if ($errors->has('email'))
                         <div class="bingo-input-error">
@@ -579,7 +579,7 @@
 
                 <div class="bingo-input-group {{ $errors->has('password') ? 'has-error' : '' }}">
                     <input type="password" name="password" id="password" placeholder="Senha"
-                           value="{{ !$errors->has('password') ? 'secret' : '' }}" required autocomplete="off">
+                           value="" required autocomplete="off">
                     <span class="input-icon material-icons">lock</span>
                     @if ($errors->has('password'))
                         <div class="bingo-input-error">
