@@ -88,11 +88,39 @@ class CardController extends Controller
     public function assign(Request $request, Card $card)
     {
         $validated = $request->validate([
-            'responsible_id' => 'required|exists:responsibles,id',
+            'responsible_id' => 'nullable|exists:responsibles,id',
+            'responsible_name' => 'required_without:responsible_id|nullable|string|max:255',
         ]);
 
+        $responsible = null;
+
+        if (!empty($validated['responsible_id'])) {
+            $responsible = Responsible::findOrFail($validated['responsible_id']);
+        }
+
+        if (!$responsible) {
+            $responsibleName = trim($validated['responsible_name'] ?? '');
+
+            if ($responsibleName === '') {
+                return back()
+                    ->withErrors(['responsible_name' => 'Informe ou selecione um responsável.'])
+                    ->withInput();
+            }
+
+            $responsible = Responsible::where('name', $responsibleName)->first();
+
+            if (!$responsible) {
+                $responsible = Responsible::create([
+                    'name' => $responsibleName,
+                    'status' => 'active',
+                ]);
+            } elseif ($responsible->status !== 'active') {
+                $responsible->update(['status' => 'active']);
+            }
+        }
+
         $card->update([
-            'responsible_id' => $validated['responsible_id'],
+            'responsible_id' => $responsible->id,
             'status' => 'distributed',
         ]);
 

@@ -90,7 +90,7 @@ class BingoRoundsTest extends TestCase
             'cards_pdf_generated_at' => null,
         ])->save();
 
-        $this->artisan('bingos:generate-card-pdfs --limit=1')
+        $this->artisan('bingos:generate-card-pdfs --limit=1 --bingo=' . $bingo->id)
             ->expectsOutputToContain('PDF gerado')
             ->assertExitCode(0);
 
@@ -339,6 +339,48 @@ class BingoRoundsTest extends TestCase
 
         $response->assertOk();
         $response->assertDontSee($card->card_number);
+    }
+
+    public function test_card_assignment_can_create_responsible_from_search_field(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 1);
+        $card = $this->createWinningLineCard($bingo, '321');
+
+        $response = $this->actingAs($user)->post(route('cards.assign', $card), [
+            'responsible_name' => 'Novo Responsavel',
+        ]);
+
+        $responsible = Responsible::where('name', 'Novo Responsavel')->firstOrFail();
+
+        $response->assertRedirect();
+        $this->assertSame($responsible->id, $card->fresh()->responsible_id);
+        $this->assertSame('distributed', $card->fresh()->status);
+        $this->assertSame('pending', $bingo->fresh()->cards_pdf_status);
+    }
+
+    public function test_card_assignment_uses_existing_responsible_from_search_field(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 1);
+        $card = $this->createWinningLineCard($bingo, '322');
+        $responsible = Responsible::create([
+            'name' => 'Responsavel Existente',
+            'status' => 'active',
+        ]);
+
+        $response = $this->actingAs($user)->post(route('cards.assign', $card), [
+            'responsible_id' => $responsible->id,
+            'responsible_name' => $responsible->name,
+        ]);
+
+        $response->assertRedirect();
+        $this->assertSame($responsible->id, $card->fresh()->responsible_id);
+        $this->assertSame(1, Responsible::where('name', 'Responsavel Existente')->count());
     }
 
     private function createBingoWithRounds(User $user, int $roundQuantity): Bingo

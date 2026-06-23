@@ -74,6 +74,12 @@
         </div>
 
         <!-- Cards Grid -->
+        <datalist id="responsibles-options">
+            @foreach($responsibles as $responsible)
+                <option value="{{ $responsible->name }}" data-id="{{ $responsible->id }}"></option>
+            @endforeach
+        </datalist>
+
         <div class="row">
             @forelse($cards as $card)
             <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
@@ -127,12 +133,19 @@
                             <div class="modal-body">
                                 <div class="form-group">
                                     <label>Responsável</label>
-                                    <select name="responsible_id" class="form-control" required>
-                                        <option value="">-- Selecione --</option>
-                                        @foreach($responsibles as $responsible)
-                                            <option value="{{ $responsible->id }}" {{ $card->responsible_id == $responsible->id ? 'selected' : '' }}>{{ $responsible->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <input type="hidden" name="responsible_id" value="{{ $card->responsible_id }}" data-responsible-id>
+                                    <input
+                                        type="text"
+                                        name="responsible_name"
+                                        class="form-control"
+                                        list="responsibles-options"
+                                        value="{{ old('responsible_name', $card->responsible?->name) }}"
+                                        placeholder="Digite para pesquisar ou criar"
+                                        autocomplete="off"
+                                        required
+                                        data-responsible-name
+                                    >
+                                    <small class="text-muted">Digite para buscar. Se o nome não existir, ele será criado ao atribuir.</small>
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -166,3 +179,47 @@
     </div>
 </div>
 @endsection
+
+@push('js')
+<script>
+    (function () {
+        const responsibles = @json($responsibles->map(fn ($responsible) => [
+            'id' => $responsible->id,
+            'name' => $responsible->name,
+        ])->values());
+
+        const normalize = (value) => value.trim().toLocaleLowerCase('pt-BR');
+        const findResponsible = (value) => responsibles.find((responsible) => normalize(responsible.name) === normalize(value));
+
+        const syncResponsibleId = (input) => {
+            const form = input.closest('form');
+            const hiddenInput = form ? form.querySelector('[data-responsible-id]') : null;
+
+            if (!hiddenInput) {
+                return;
+            }
+
+            const match = findResponsible(input.value);
+            hiddenInput.value = match ? match.id : '';
+        };
+
+        document.addEventListener('input', function (event) {
+            if (!event.target.matches('[data-responsible-name]')) {
+                return;
+            }
+
+            syncResponsibleId(event.target);
+        });
+
+        document.addEventListener('submit', function (event) {
+            const input = event.target.querySelector('[data-responsible-name]');
+
+            if (!input) {
+                return;
+            }
+
+            syncResponsibleId(input);
+        });
+    })();
+</script>
+@endpush
