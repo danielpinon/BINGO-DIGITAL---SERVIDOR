@@ -10,16 +10,17 @@
                     <small class="text-muted">Detalhes do evento</small>
                 </div>
                 <div class="d-flex" style="gap: 8px;">
-                    <form action="{{ route('cards.pdf.start', $bingo) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button type="submit" class="btn btn-info btn-sm">
-                            <i class="material-icons">picture_as_pdf</i> Gerar PDF
-                        </button>
-                    </form>
                     @if($bingo->pdf_available)
                         <a href="{{ route('cards.export', ['bingo_id' => $bingo->id]) }}" class="btn btn-success btn-sm">
                             <i class="material-icons">download</i> Baixar PDF
                         </a>
+                    @else
+                        <form action="{{ route('cards.pdf.start', $bingo) }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-info btn-sm">
+                                <i class="material-icons">picture_as_pdf</i> Gerar PDF
+                            </button>
+                        </form>
                     @endif
                     <a href="{{ route('bingos.edit', $bingo) }}" class="btn btn-warning btn-sm">
                         <i class="material-icons">edit</i> Editar

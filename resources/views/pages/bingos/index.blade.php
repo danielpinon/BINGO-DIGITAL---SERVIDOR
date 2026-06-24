@@ -131,16 +131,17 @@
                                             <a href="{{ route('bingos.edit', $bingo) }}" class="btn btn-sm btn-warning" title="Editar">
                                                 <i class="material-icons">edit</i>
                                             </a>
-                                            <form action="{{ route('cards.pdf.start', $bingo) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-secondary" title="Gerar PDF das Cartelas">
-                                                    <i class="material-icons">picture_as_pdf</i> Gerar PDF
-                                                </button>
-                                            </form>
                                             @if($bingo->pdf_available)
                                                 <a href="{{ route('cards.export', ['bingo_id' => $bingo->id]) }}" class="btn btn-sm btn-success" title="Baixar PDF das Cartelas">
                                                     <i class="material-icons">download</i> Baixar PDF
                                                 </a>
+                                            @else
+                                                <form action="{{ route('cards.pdf.start', $bingo) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-secondary" title="Gerar PDF das Cartelas">
+                                                        <i class="material-icons">picture_as_pdf</i> Gerar PDF
+                                                    </button>
+                                                </form>
                                             @endif
                                             @if($bingo->status === 'preparation')
                                                 <form action="{{ route('bingos.start', $bingo) }}" method="POST" class="d-inline">
