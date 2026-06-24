@@ -278,6 +278,34 @@ class BingoRoundsTest extends TestCase
             ->assertJsonPath('download_url', route('cards.export', ['bingo_id' => $bingo->id]));
     }
 
+    public function test_pdf_download_is_available_when_file_exists_even_if_status_is_processing(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 1);
+
+        $bingo->forceFill([
+            'cards_pdf_status' => 'processing',
+            'cards_pdf_path' => 'bingo-card-pdfs/processing-but-ready.pdf',
+            'cards_pdf_generated_at' => now(),
+        ])->save();
+        Storage::disk('local')->put($bingo->cards_pdf_path, 'pdf');
+
+        $this->assertTrue($bingo->fresh()->pdf_available);
+        $this->assertStringContainsString('PDF Disponível', $bingo->fresh()->cards_pdf_badge);
+
+        $response = $this->actingAs($user)->getJson(route('cards.pdf.progress', $bingo));
+
+        $response->assertOk()
+            ->assertJson([
+                'status' => 'ready',
+                'status_label' => 'Pronto',
+                'ready' => true,
+            ])
+            ->assertJsonPath('download_url', route('cards.export', ['bingo_id' => $bingo->id]));
+    }
+
     public function test_card_generation_uses_next_available_number_after_existing_gap(): void
     {
         $user = User::factory()->create();

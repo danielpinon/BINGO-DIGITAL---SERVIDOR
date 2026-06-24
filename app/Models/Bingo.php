@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -93,12 +94,21 @@ class Bingo extends Model
 
     public function getCardsPdfBadgeAttribute()
     {
+        if ($this->pdf_available) {
+            return '<span class="badge badge-success">PDF Disponível</span>';
+        }
+
         return match($this->cards_pdf_status) {
-            'ready' => '<span class="badge badge-success">PDF Disponível</span>',
             'processing' => '<span class="badge badge-info">Preparando PDF</span>',
             'failed' => '<span class="badge badge-danger">PDF com Erro</span>',
             default => '<span class="badge badge-secondary">Gerar PDF</span>',
         };
+    }
+
+    public function getPdfAvailableAttribute(): bool
+    {
+        return (bool) $this->cards_pdf_path
+            && Storage::disk('local')->exists($this->cards_pdf_path);
     }
 
     public function getCardGenerationBadgeAttribute()

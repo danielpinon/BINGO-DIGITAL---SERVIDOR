@@ -219,13 +219,11 @@ class CardController extends Controller
     {
         $bingo->refresh();
         $progress = $this->pdfService->progress($bingo);
-        $isReady = $bingo->cards_pdf_status === 'ready'
-            && $bingo->cards_pdf_path
-            && Storage::disk('local')->exists($bingo->cards_pdf_path);
+        $isReady = $bingo->pdf_available;
 
         return response()->json([
-            'status' => $bingo->cards_pdf_status ?? 'pending',
-            'status_label' => match ($bingo->cards_pdf_status) {
+            'status' => $isReady ? 'ready' : ($bingo->cards_pdf_status ?? 'pending'),
+            'status_label' => match ($isReady ? 'ready' : $bingo->cards_pdf_status) {
                 'ready' => 'Pronto',
                 'processing' => 'Processando',
                 'failed' => 'Falhou',
