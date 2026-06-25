@@ -12,6 +12,10 @@ class BingoCardsPdfService
 {
     private const PROGRESS_TTL_SECONDS = 3600;
 
+    public function __construct(private BingoTicketPdfRenderer $ticketPdfRenderer)
+    {
+    }
+
     public function markPending(Bingo $bingo): void
     {
         $bingo->forceFill([
@@ -32,17 +36,26 @@ class BingoCardsPdfService
         $this->setProgress($bingo, 15, 'Preparando dados do bingo.');
 
         try {
-            $bingo->load(['rounds', 'cards' => function ($query) {
-                $query->orderBy('card_number')->with(['numbers', 'responsible']);
-            }]);
-            $this->setProgress($bingo, 35, 'Cartelas carregadas. Montando layout do PDF.');
-
-            $pdf = app('dompdf.wrapper');
-            $pdf->loadView('pdf.cards', compact('bingo'));
-            $this->setProgress($bingo, 65, 'Renderizando PDF das cartelas.');
-
             $path = 'bingo-card-pdfs/bingo-' . $bingo->id . '-cartelas.pdf';
-            Storage::disk('local')->put($path, $pdf->output());
+            $cardsCount = $bingo->cards()->count();
+            $this->setProgress($bingo, 35, "Cartelas carregadas ({$cardsCount}). Montando layout do PDF.");
+
+            if ($this->shouldUseTicketRenderer($bingo)) {
+                $this->ticketPdfRenderer->render($bingo, $path, function (int $done, int $total) use ($bingo) {
+                    $percent = 35 + (int) floor(($done / max(1, $total)) * 55);
+                    $this->setProgress($bingo, $percent, "Renderizando PDF: {$done}/{$total} cartelas.");
+                });
+            } else {
+                $bingo->load(['rounds', 'cards' => function ($query) {
+                    $query->orderByRaw('CAST(card_number AS UNSIGNED) ASC')->with(['numbers', 'responsible']);
+                }]);
+                $this->setProgress($bingo, 65, 'Renderizando PDF das cartelas.');
+
+                $pdf = app('dompdf.wrapper');
+                $pdf->loadView('pdf.cards', compact('bingo'));
+                Storage::disk('local')->put($path, $pdf->output());
+            }
+
             $this->setProgress($bingo, 90, 'Salvando arquivo gerado.');
 
             $bingo->forceFill([
@@ -100,5 +113,11 @@ class BingoCardsPdfService
     private function progressCacheKey(Bingo $bingo): string
     {
         return 'bingo-card-pdf-progress-' . $bingo->id;
+    }
+
+    private function shouldUseTicketRenderer(Bingo $bingo): bool
+    {
+        return (bool) $bingo->card_template_path
+            || file_exists(public_path('material/img/bingo-ticket-template.jpeg'));
     }
 }
