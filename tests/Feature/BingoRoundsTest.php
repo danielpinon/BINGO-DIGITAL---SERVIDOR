@@ -596,6 +596,21 @@ class BingoRoundsTest extends TestCase
         $response->assertDontSee($card->card_number);
     }
 
+    public function test_cards_index_orders_card_numbers_numerically(): void
+    {
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 1);
+
+        foreach (['998', '999', '1000', '1001'] as $cardNumber) {
+            $this->createWinningLineCard($bingo, $cardNumber);
+        }
+
+        $response = $this->actingAs($user)->get(route('cards.index', ['bingo_id' => $bingo->id]));
+
+        $response->assertOk();
+        $response->assertSeeInOrder(['998', '999', '1000', '1001']);
+    }
+
     public function test_card_assignment_can_create_responsible_from_search_field(): void
     {
         Storage::fake('local');

@@ -41,7 +41,10 @@ class CardController extends Controller
             $query->where('status', $request->status);
         }
         
-        $cards = $query->orderBy('bingo_id')->orderBy('card_number')->paginate(20);
+        $cards = $query
+            ->orderBy('bingo_id')
+            ->orderByRaw('CAST(card_number AS UNSIGNED) ASC')
+            ->paginate(20);
         $bingos = Bingo::orderBy('name')->get();
         $responsibles = Responsible::where('status', 'active')->orderBy('name')->get();
         
