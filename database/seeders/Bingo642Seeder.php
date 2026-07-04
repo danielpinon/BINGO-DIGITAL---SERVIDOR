@@ -33,7 +33,7 @@ class Bingo642Seeder extends Seeder
 
             DB::table('bingos')->insert([
                 'id' => self::BINGO_ID,
-                'name' => 'Bingo 7000 Cartelas',
+                'name' => 'Reinauguração Novo Repartimento',
                 'description' => 'Bingo gerado com 7000 cartelas para impressão em PDF.',
                 'event_date' => '2026-07-04',
                 'event_time' => '10:00:00',
@@ -47,7 +47,7 @@ class Bingo642Seeder extends Seeder
                 'numbers_per_card' => 25,
                 'round_quantity' => 3,
                 'cards_per_page' => 1,
-                'card_title' => 'BINGO',
+                'card_title' => 'REINAUGURAÇÃO NOVO REPARTIMENTO',
                 'card_logo_path' => null,
                 'card_template_path' => null,
                 'only_linked_cards' => false,
