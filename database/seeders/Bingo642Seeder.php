@@ -62,15 +62,35 @@ class Bingo642Seeder extends Seeder
                 'deleted_at' => null,
             ]);
 
-            $patternId = DB::table('bingo_prize_patterns')->insertGetId([
-                'bingo_id' => self::BINGO_ID,
-                'name' => 'Cartela Cheia',
-                'pattern_type' => 'full_card',
-                'pattern_order' => 1,
-                'is_completed' => false,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]);
+            $patternIds = [
+                1 => DB::table('bingo_prize_patterns')->insertGetId([
+                    'bingo_id' => self::BINGO_ID,
+                    'name' => '1º Prêmio - Moto',
+                    'pattern_type' => 'full_card',
+                    'pattern_order' => 1,
+                    'is_completed' => false,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]),
+                2 => DB::table('bingo_prize_patterns')->insertGetId([
+                    'bingo_id' => self::BINGO_ID,
+                    'name' => '2º Prêmio - Quina',
+                    'pattern_type' => 'quina',
+                    'pattern_order' => 2,
+                    'is_completed' => false,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]),
+                3 => DB::table('bingo_prize_patterns')->insertGetId([
+                    'bingo_id' => self::BINGO_ID,
+                    'name' => '3º Prêmio - Quina',
+                    'pattern_type' => 'quina',
+                    'pattern_order' => 3,
+                    'is_completed' => false,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]),
+            ];
 
             $rounds = [];
             for ($round = 1; $round <= 3; $round++) {
@@ -78,7 +98,7 @@ class Bingo642Seeder extends Seeder
                     'bingo_id' => self::BINGO_ID,
                     'round_number' => $round,
                     'status' => 'pending',
-                    'current_prize_pattern_id' => $patternId,
+                    'current_prize_pattern_id' => $patternIds[$round],
                     'started_at' => null,
                     'finished_at' => null,
                     'created_at' => $now,

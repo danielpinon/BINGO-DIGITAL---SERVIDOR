@@ -409,6 +409,57 @@ class BingoRoundsTest extends TestCase
         $this->assertSame(0, DrawnNumber::where('bingo_round_id', $round->id)->count());
     }
 
+    public function test_confirming_winner_prefers_next_round_configured_prize(): void
+    {
+        $user = User::factory()->create();
+        $bingo = $this->createBingoWithRounds($user, 3);
+        $roundOne = $bingo->rounds()->where('round_number', 1)->first();
+        $roundTwo = $bingo->rounds()->where('round_number', 2)->first();
+        $firstPattern = $bingo->prizePatterns()->first();
+        $secondPattern = BingoPrizePattern::create([
+            'bingo_id' => $bingo->id,
+            'name' => '2º Prêmio - Quina',
+            'pattern_type' => 'quina',
+            'pattern_order' => 2,
+        ]);
+
+        $bingo->update([
+            'status' => 'ongoing',
+            'current_prize_pattern_id' => $firstPattern->id,
+        ]);
+
+        $roundOne->update([
+            'status' => 'ongoing',
+            'current_prize_pattern_id' => $firstPattern->id,
+            'started_at' => now(),
+        ]);
+
+        $roundTwo->update([
+            'current_prize_pattern_id' => $secondPattern->id,
+        ]);
+
+        $card = $this->createWinningLineCard($bingo);
+        foreach ([1, 2, 3, 4, 5] as $number) {
+            DrawnNumber::create([
+                'bingo_id' => $bingo->id,
+                'bingo_round_id' => $roundOne->id,
+                'number' => $number,
+                'drawn_at' => now(),
+            ]);
+        }
+
+        $this->actingAs($user);
+
+        Livewire::test(BingoDraw::class, ['bingoId' => $bingo->id])
+            ->call('confirmWinner', $card->id);
+
+        $this->assertSame('finished', $roundOne->refresh()->status);
+        $this->assertNull($roundOne->current_prize_pattern_id);
+        $this->assertSame('ongoing', $roundTwo->refresh()->status);
+        $this->assertSame($secondPattern->id, $roundTwo->current_prize_pattern_id);
+        $this->assertSame($secondPattern->id, $bingo->refresh()->current_prize_pattern_id);
+    }
+
     public function test_public_screen_hides_card_and_responsible_data_for_close_cards(): void
     {
         $user = User::factory()->create();

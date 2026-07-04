@@ -190,6 +190,33 @@ class BingoDraw extends Component
                 'confirmed_by' => Auth::id(),
             ]);
 
+            $configuredNextRound = $bingo->rounds()
+                ->where('round_number', '>', $round->round_number)
+                ->where('round_number', '<=', $bingo->round_quantity)
+                ->whereNotNull('current_prize_pattern_id')
+                ->orderBy('round_number')
+                ->first();
+
+            if ($configuredNextRound) {
+                $round->update([
+                    'status' => 'finished',
+                    'current_prize_pattern_id' => null,
+                    'finished_at' => now(),
+                ]);
+
+                $configuredNextRound->update([
+                    'status' => 'ongoing',
+                    'started_at' => now(),
+                    'finished_at' => null,
+                ]);
+
+                $bingo->update([
+                    'current_prize_pattern_id' => $configuredNextRound->current_prize_pattern_id,
+                ]);
+
+                return;
+            }
+
             $nextPattern = $bingo->prizePatterns()
                 ->where('pattern_order', '>', $currentPattern->pattern_order)
                 ->orderBy('pattern_order')
