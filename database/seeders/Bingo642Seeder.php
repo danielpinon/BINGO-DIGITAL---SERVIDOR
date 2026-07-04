@@ -12,6 +12,7 @@ class Bingo642Seeder extends Seeder
 {
     private const BINGO_ID = 642;
     private const DATA_FILE = 'data/bingo_642_cards.json.gz';
+    private const RESPONSIBLES_FILE = 'data/bingo_642_responsibles.json.gz';
 
     public function run(): void
     {
@@ -50,7 +51,7 @@ class Bingo642Seeder extends Seeder
                 'card_title' => 'REINAUGURAÇÃO NOVO REPARTIMENTO',
                 'card_logo_path' => null,
                 'card_template_path' => null,
-                'only_linked_cards' => false,
+                'only_linked_cards' => true,
                 'cards_pdf_path' => null,
                 'cards_pdf_status' => 'pending',
                 'cards_pdf_generated_at' => null,
@@ -122,6 +123,8 @@ class Bingo642Seeder extends Seeder
                 ->where('bingo_id', self::BINGO_ID)
                 ->pluck('id', 'card_number');
 
+            $this->linkResponsibleCards($cardIds, $now);
+
             $numberRows = [];
             foreach ($cards as $card) {
                 $cardId = $cardIds[$card['card_number']] ?? null;
@@ -188,5 +191,92 @@ class Bingo642Seeder extends Seeder
         }
 
         return $cards;
+    }
+
+    private function loadResponsibleAssignments(): array
+    {
+        $path = database_path('seeders/' . self::RESPONSIBLES_FILE);
+
+        if (!is_file($path)) {
+            throw new RuntimeException("Arquivo de responsaveis da seed nao encontrado: {$path}");
+        }
+
+        $decoded = gzdecode(file_get_contents($path));
+        $assignments = json_decode($decoded, true);
+
+        if (!is_array($assignments)) {
+            throw new RuntimeException('A seed de responsaveis do Bingo 642 precisa conter uma lista valida.');
+        }
+
+        return $assignments;
+    }
+
+    private function linkResponsibleCards($cardIds, $now): void
+    {
+        foreach ($this->loadResponsibleAssignments() as $assignment) {
+            $cardNumber = $assignment['card_number'] ?? null;
+            $name = trim((string) ($assignment['name'] ?? ''));
+            $phone = $assignment['phone'] ?? null;
+            $phone = $phone === null ? null : trim((string) $phone);
+
+            if (!$cardNumber || $name === '') {
+                throw new RuntimeException('Vinculo de responsavel invalido na seed do Bingo 642.');
+            }
+
+            $cardId = $cardIds[$cardNumber] ?? null;
+
+            if (!$cardId) {
+                throw new RuntimeException("Cartela {$cardNumber} nao foi criada para vinculo de responsavel.");
+            }
+
+            $responsibleId = $this->firstOrCreateResponsible($name, $phone, $now);
+
+            DB::table('cards')
+                ->where('id', $cardId)
+                ->update([
+                    'responsible_id' => $responsibleId,
+                    'status' => 'distributed',
+                    'updated_at' => $now,
+                ]);
+        }
+    }
+
+    private function firstOrCreateResponsible(string $name, ?string $phone, $now): int
+    {
+        $query = DB::table('responsibles')
+            ->where('name', $name)
+            ->whereNull('deleted_at');
+
+        if ($phone === null || $phone === '') {
+            $query->whereNull('phone');
+            $phone = null;
+        } else {
+            $query->where('phone', $phone);
+        }
+
+        $responsible = $query->first();
+
+        if ($responsible) {
+            if ($responsible->status !== 'active') {
+                DB::table('responsibles')
+                    ->where('id', $responsible->id)
+                    ->update([
+                        'status' => 'active',
+                        'updated_at' => $now,
+                    ]);
+            }
+
+            return (int) $responsible->id;
+        }
+
+        return (int) DB::table('responsibles')->insertGetId([
+            'name' => $name,
+            'phone' => $phone,
+            'email' => null,
+            'status' => 'active',
+            'created_at' => $now,
+            'updated_at' => $now,
+            'deleted_at' => null,
+        ]);
     }
 }
